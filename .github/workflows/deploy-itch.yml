@@ -1,0 +1,19 @@
+name: Deploy to itch.io
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up butler
+      uses: jdno/setup-butler@v1
+
+    - name: Deploy to itch.io
+      run: butler push . zheyu-julie/reed-bird-watching-simulator:html5
+      env:
+        BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
