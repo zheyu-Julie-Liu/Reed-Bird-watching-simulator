@@ -226,9 +226,7 @@ const PACK_FILES = [
 				return { file: file, buffer: buffer };
 			});
 		}));
-		// demo.wasm (38M) 托管在腾讯云COS，超过EdgeOne Pages 25M限制
-		var COS_BASE = 'https://reed-bird-simulator-1453450462.cos.ap-nanjing.myqcloud.com/demo';
-		var initEngine = engine.init(COS_BASE);
+		var initEngine = engine.init('demo');
 		// 等待所有 .pck 下载完成 + 引擎初始化完成
 		Promise.all([fetchPacks, initEngine]).then(function (results) {
 			var packs = results[0];
