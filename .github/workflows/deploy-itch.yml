@@ -13,6 +13,9 @@ jobs:
     - name: Set up butler
       uses: jdno/setup-butler@v1
 
+    - name: Create index.html for itch.io
+      run: cp demo.html index.html
+
     - name: Deploy to itch.io
       run: butler push . zheyu-julie/reed-bird-watching-simulator:html5
       env:
