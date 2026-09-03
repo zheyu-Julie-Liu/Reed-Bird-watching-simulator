@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+		<title>芦苇荡巡护模拟器</title>
+		<style>
+:root {
+	--ink: #1f2a1c;
+	--cream: #f6ecd2;
+	--cream-soft: rgba(246, 236, 210, 0.92);
+	--gold: #d9b66a;
+	--gold-deep: #b8893a;
+	--reed: #2E7D32;
+	--reed-light: #66BB6A;
+	--shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+	--radius: 14px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+	height: 100%;
+	width: 100%;
+	overflow: hidden;
+	font-family: "Songti SC", "STSong", "Source Han Serif SC", "Noto Serif SC", "Georgia", "Times New Roman", "Noto Serif", serif;
+	color: var(--cream);
+	background: #000;
+	-webkit-font-smoothing: antialiased;
+}
+
+/* ===== Godot canvas: FULLSCREEN directly on body, NOT wrapped in any container ===== */
+#canvas {
+	display: block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100% !important;
+	height: 100% !important;
+	z-index: 0;
+}
+#canvas:focus { outline: none; }
+
+/* ===== Godot loading status ===== */
+#status, #status-splash, #status-progress {
+	position: absolute;
+	left: 0;
+	right: 0;
+}
+#status, #status-splash {
+	top: 0;
+	bottom: 0;
+}
+#status {
+	background-color: #000;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	visibility: hidden;
+	z-index: 5;
+}
+#status-splash {
+	max-height: 100%;
+	max-width: 100%;
+	margin: auto;
+}
+#status-splash.show-image--false { display: none; }
+#status-splash.fullsize--true { height: 100%; width: 100%; object-fit: contain; }
+#status-splash.use-filter--false { image-rendering: pixelated; }
+#status-progress, #status-notice { display: none; }
+#status-progress {
+	bottom: 10%;
+	width: 50%;
+	margin: 0 auto;
+}
+#status-notice {
+	background-color: #5b3943;
+	border-radius: 0.5rem;
+	border: 1px solid #9b3943;
+	color: #e0e0e0;
+	font-family: 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', 'Noto Sans', Arial, sans-serif;
+	line-height: 1.3;
+	margin: 0 2rem;
+	overflow: hidden;
+	padding: 1rem;
+	text-align: center;
+	z-index: 6;
+}
+
+/* ===== Cover mask: centered 16:9 viewport, ONLY for cover UI (canvas is OUTSIDE) ===== */
+.cover-mask {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: min(100vw, 177.78vh);
+	height: min(100vh, 56.25vw);
+	overflow: hidden;
+	z-index: 1;
+}
+
+/* Inner 1920x1080 canvas — scaled via JS to fit mask perfectly.
+   All children use original px values from cover design. */
+.cover-inner {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 1920px;
+	height: 1080px;
+	transform-origin: top left;
+}
+
+/* ===== Cover elements (identical layout to English version, px-based) ===== */
+.cover {
+	position: absolute;
+	inset: 0;
+	background: url("game_cover.webp") center center / cover no-repeat;
+	transform: scale(1.04);
+	animation: slowZoom 28s ease-in-out infinite alternate;
+	z-index: 0;
+}
+@keyframes slowZoom {
+	from { transform: scale(1.04); }
+	to   { transform: scale(1.10); }
+}
+
+.veil {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	background: linear-gradient(180deg, rgba(10,18,12,0.55) 0%, rgba(10,18,12,0.05) 28%, rgba(10,18,12,0.15) 55%, rgba(8,14,10,0.82) 100%);
+	pointer-events: none;
+}
+
+.topbar {
+	position: relative;
+	z-index: 3;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 45px 68px;
+}
+.brand {
+	display: flex;
+	align-items: center;
+	gap: 22px;
+	opacity: 0;
+	animation: fadeDown 1s ease 0.2s forwards;
+}
+.brand img {
+	width: 100px;
+	height: 100px;
+	border-radius: 50%;
+	box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+	border: 2px solid rgba(246,236,210,0.6);
+}
+.brand .name {
+	font-size: 42px;
+	letter-spacing: 3px;
+	color: var(--cream-soft);
+	text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+}
+.version {
+	font-size: 42px;
+	letter-spacing: 3px;
+	color: rgba(246,236,210,0.7);
+	text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+	opacity: 0;
+	animation: fadeDown 1s ease 0.35s forwards;
+}
+
+/* 标题及以下内容整体垂直居中于画面正中间 */
+.stage {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 100%;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+}
+
+.title {
+	font-family: "Songti SC", "STSong", "Source Han Serif SC", "Noto Serif SC", "Georgia", "Times New Roman", serif;
+	font-size: 80px;
+	font-weight: 700;
+	letter-spacing: 0.10em;
+	text-indent: 0.10em;
+	color: var(--cream);
+	text-shadow:
+		0 2px 0 rgba(0,0,0,0.35),
+		0 6px 24px rgba(0,0,0,0.65),
+		0 0 60px rgba(217,182,106,0.25);
+	opacity: 0;
+	transform: translateY(22px);
+	animation: fadeUp 1.1s ease 0.5s forwards;
+	white-space: nowrap;
+}
+.sub-title {
+	margin-top: 22px;
+	font-size: 42px;
+	letter-spacing: 0.30em;
+	text-indent: 0.30em;
+	color: var(--gold);
+	text-shadow: 0 2px 4px rgba(0,0,0,0.9), 0 4px 18px rgba(0,0,0,0.8);
+	opacity: 0;
+	transform: translateY(18px);
+	animation: fadeUp 1.1s ease 0.7s forwards;
+}
+.tagline {
+	margin-top: 96px;
+	font-size: 30px;
+	letter-spacing: 0.22em;
+	text-indent: 0.22em;
+	font-style: italic;
+	color: rgba(246,236,210,0.86);
+	text-shadow: 0 2px 4px rgba(0,0,0,0.9), 0 4px 18px rgba(0,0,0,0.75);
+	opacity: 0;
+	transform: translateY(18px);
+	animation: fadeUp 1.1s ease 0.85s forwards;
+	white-space: nowrap;
+}
+
+.divider {
+	display: flex;
+	align-items: center;
+	gap: 22px;
+	margin: 53px 0 59px;
+	opacity: 0;
+	animation: fadeIn 1s ease 1s forwards;
+}
+.divider .line {
+	width: 110px;
+	height: 1px;
+	background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.divider .dot {
+	width: 11px;
+	height: 11px;
+	border-radius: 50%;
+	background: var(--gold);
+	box-shadow: 0 0 12px var(--gold);
+}
+
+.actions {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 24px;
+	margin-top: 80px;
+	opacity: 0;
+	transform: translateY(18px);
+	animation: fadeUp 1.1s ease 1.15s forwards;
+}
+.btn {
+	appearance: none;
+	border: none;
+	cursor: pointer;
+	font-family: inherit;
+	font-size: 28px;
+	letter-spacing: 0.18em;
+	text-indent: 0.18em;
+	padding: 25px 100px;
+	border-radius: var(--radius);
+	transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+	display: flex;
+	align-items: center;
+	gap: 20px;
+	backdrop-filter: blur(4px);
+}
+.btn-primary {
+	background: linear-gradient(180deg, #3a8f40 0%, #256b2a 100%);
+	color: #fff;
+	box-shadow: 0 8px 26px rgba(46,125,50,0.5), inset 0 1px 0 rgba(255,255,255,0.25);
+	border: 1px solid rgba(255,255,255,0.18);
+	min-width: 450px;
+	justify-content: center;
+}
+.btn-primary:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 12px 34px rgba(46,125,50,0.65), inset 0 1px 0 rgba(255,255,255,0.3);
+}
+.btn-primary:active { transform: translateY(0); }
+.btn-primary .arrow { transition: transform 0.25s ease; }
+.btn-primary:hover .arrow { transform: translateX(5px); }
+
+.btn-loading {
+	display: none;
+	font-size: 22px;
+	letter-spacing: 0.1em;
+	color: rgba(255,255,255,0.8);
+}
+
+.footer {
+	position: absolute;
+	bottom: 40px;
+	left: 0;
+	right: 0;
+	z-index: 3;
+	display: flex;
+	justify-content: center;
+	padding: 0 68px;
+	font-size: 21px;
+	letter-spacing: 1.5px;
+	color: rgba(246,236,210,0.6);
+	text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+	opacity: 0;
+	animation: fadeIn 1s ease 1.4s forwards;
+}
+
+/* Leave animation */
+.cover-mask.leave {
+	transition: opacity 0.8s ease;
+	opacity: 0;
+	pointer-events: none;
+}
+
+@keyframes fadeUp   { to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeDown { to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeIn   { to { opacity: 1; } }
+		</style>
+	</head>
+	<body>
+		<!-- Godot canvas: OUTSIDE cover-mask, fullscreen, NEVER scaled by cover -->
+		<canvas id="canvas" style="display:none;">
+			您的浏览器不支持 canvas 标签。
+		</canvas>
+
+		<!-- Godot loading status -->
+		<div id="status">
+			<img id="status-splash" class="show-image--true fullsize--true use-filter--true" src="demo.png" alt="">
+			<progress id="status-progress"></progress>
+			<div id="status-notice"></div>
+		</div>
+
+		<!-- ===== Cover UI ONLY: centered 16:9 mask with scaled 1920x1080 inner ===== -->
+		<div class="cover-mask" id="coverMask">
+			<div class="cover-inner" id="coverInner">
+				<div class="cover" id="coverBg"></div>
+				<div class="veil" id="coverVeil"></div>
+
+				<header class="topbar" id="topbar">
+					<div class="brand">
+						<img src="game_logo.webp" alt="logo" />
+						<span class="name">菁灵社·哲思创意</span>
+					</div>
+					<div class="version">v1.0.0 · BUILD 2026.08</div>
+				</header>
+
+				<main class="stage" id="stage">
+					<h1 class="title">芦苇荡巡护模拟器</h1>
+					<div class="sub-title">湿地科学体验</div>
+					<p class="tagline">踏入湿地 · 细读羽迹 · 守护生灵</p>
+
+					<div class="divider">
+						<span class="line"></span>
+						<span class="dot"></span>
+						<span class="line"></span>
+					</div>
+
+					<div class="actions">
+						<button class="btn btn-primary" id="startBtn">
+							<span id="startLabel">开始巡护</span>
+							<span class="arrow" id="startArrow">&rarr;</span>
+							<span class="btn-loading" id="startLoading">加载中…</span>
+						</button>
+					</div>
+				</main>
+
+				<footer class="footer" id="footer">
+					<span>&copy; 2026 哲思创意 &middot; 湿地科学巡护体验</span>
+				</footer>
+			</div>
+		</div>
+
+		<noscript>您的浏览器不支持 JavaScript。</noscript>
+
+		<!-- ===== 封面缩放脚本：独立于 Godot 引擎块，导出前预览也能正常缩放 ===== -->
+		<script>
+function scaleCover() {
+	const mask = document.getElementById('coverMask');
+	const inner = document.getElementById('coverInner');
+	const scale = mask.clientWidth / 1920;
+	inner.style.transform = 'scale(' + scale + ')';
+}
+window.addEventListener('resize', scaleCover);
+window.addEventListener('load', scaleCover);
+scaleCover();
+		</script>
+
+		false_TAG
+		<script src="demo.js"></script>
+		<script>
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":26623496,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_THREADS_ENABLED = false;
+const engine = new Engine(GODOT_CONFIG);
+
+// URL 带 ?reset=1：清除浏览器 IndexedDB/localStorage 存档后刷新。
+// 存档存于 user://（Web 端=浏览器 IndexedDB），不在导出包内；残留进度
+// 来自之前测试，带此参数打开可一键回到全新开局（stage1）。玩家正常
+// 打开不带参数，不受影响。
+const RESET_PARAM = new URLSearchParams(location.search).has('reset');
+if (RESET_PARAM) {
+	(async () => {
+		try {
+			const dbs = await indexedDB.databases();
+			await Promise.all(dbs.map(d => new Promise(res => {
+				const r = indexedDB.deleteDatabase(d.name);
+				r.onsuccess = r.onerror = r.onblocked = () => res();
+			})));
+		} catch (e) {}
+		try { localStorage.clear(); } catch (e) {}
+		location.replace(location.pathname + location.search.replace(/[?&]reset=1&?/, ''));
+	})();
+}
+
+
+// 分包预加载清单（与 GameManager.SUBPACKAGES 一致）：Web 端分包必须通过
+// preloadFile 预加载进虚拟 FS，否则 GameManager._load_subpackages 报
+// "Missing on web" → 鸟类素材全部缺失（用户：web 壳图片不全、卡加载）。
+// 主包名由 GODOT_CONFIG.executable 推导（Godot 4.7 不再替换
+// $GODOT_EXECUTABLE/$GODOT_MAIN_PACK 占位符，只替换 {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":26623496,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4}），
+// 随导出文件名自适应（demo.html → demo.pck / index.html → index.pck）。
+// 主包一并预加载，点击"开始巡护"后秒启动
+const MAIN_PACK = GODOT_CONFIG.executable + '.pck';
+const PACK_FILES = [
+	MAIN_PACK,
+	'subpackages/songbird.pck','subpackages/wader.pck','subpackages/swimmer.pck','subpackages/other.pck',
+	'subpackages/reeds.pck','subpackages/marsh.pck','subpackages/metasequoia.pck','subpackages/water.pck',
+	'subpackages/songbird_flight.pck','subpackages/songbird_extra_flight.pck','subpackages/wader_flight.pck',
+	'subpackages/swimmer_flight.pck','subpackages/other_flight.pck','subpackages/backgrounds.pck',
+];
+
+var engineReady = false;
+var gameStarted = false;
+
+(function () {
+	const statusOverlay = document.getElementById('status');
+	const statusProgress = document.getElementById('status-progress');
+	const statusNotice = document.getElementById('status-notice');
+	let initializing = true;
+	let statusMode = '';
+
+	function setStatusMode(mode) {
+		if (statusMode === mode || !initializing) return;
+		if (mode === 'hidden') { statusOverlay.remove(); initializing = false; return; }
+		statusOverlay.style.visibility = 'visible';
+		statusProgress.style.display = mode === 'progress' ? 'block' : 'none';
+		statusNotice.style.display = mode === 'notice' ? 'block' : 'none';
+		statusMode = mode;
+	}
+	function setStatusNotice(text) {
+		while (statusNotice.lastChild) statusNotice.removeChild(statusNotice.lastChild);
+		text.split('\n').forEach((line) => {
+			statusNotice.appendChild(document.createTextNode(line));
+			statusNotice.appendChild(document.createElement('br'));
+		});
+	}
+	function displayFailureNotice(err) {
+		console.error(err);
+		setStatusNotice(err instanceof Error ? err.message : (typeof err === 'string' ? err : '发生未知错误。'));
+		setStatusMode('notice');
+		initializing = false;
+	}
+
+	const missing = Engine.getMissingFeatures({ threads: GODOT_THREADS_ENABLED });
+	if (missing.length !== 0) {
+		if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] && 'serviceWorker' in navigator) {
+			let swPromise;
+			try { swPromise = navigator.serviceWorker.getRegistration(); }
+			catch (e) { swPromise = Promise.reject(new Error('Service worker registration failed.')); }
+			Promise.race([
+				swPromise.then(r => { if (r) throw new Error('Service worker already exists.'); return r; }).then(() => engine.installServiceWorker()),
+				new Promise(r => setTimeout(r, 2000)),
+			]).then(() => window.location.reload()).catch(e => console.error('SW error:', e));
+		} else {
+			displayFailureNotice('错误\n运行 Godot Web 项目所需以下功能缺失：\n' + missing.join('\n'));
+		}
+	} else {
+		// 预加载主包+全部分包（fetch → preloadFile 进虚拟 FS）后再 init，
+		// 与 engine.init 并行：下载完即 engineReady，点击"开始巡护"秒启动
+		Promise.all([
+			Promise.all(PACK_FILES.map(file => fetch(file).then(r => {
+				if (!r.ok) throw new Error('Failed to load ' + file + ': HTTP ' + r.status);
+				return r.arrayBuffer();
+			}).then(buf => ({ file, buffer: buf })))),
+			engine.init(GODOT_CONFIG.executable)
+		]).then(results => {
+			const packs = results[0];
+			for (let i = 0; i < packs.length; i++) engine.preloadFile(packs[i].buffer, packs[i].file);
+			engineReady = true;
+			if (gameStarted) startGame();
+		}, displayFailureNotice);
+	}
+}());
+
+function startGame() {
+	if (!engineReady) {
+		document.getElementById('startLabel').style.display = 'none';
+		document.getElementById('startArrow').style.display = 'none';
+		document.getElementById('startLoading').style.display = 'inline';
+		gameStarted = true;
+		return;
+	}
+	engine.start({ args: ['--main-pack', MAIN_PACK] }).then(() => {
+		document.getElementById('coverMask').classList.add('leave');
+		const canvas = document.getElementById('canvas');
+		canvas.style.display = 'block';
+		canvas.focus();
+	}, err => {
+		console.error('Failed to start game:', err);
+		document.getElementById('startLoading').textContent = '启动失败';
+		document.getElementById('startLabel').style.display = 'inline';
+		document.getElementById('startArrow').style.display = 'inline';
+		document.getElementById('startLoading').style.display = 'none';
+	});
+}
+
+document.getElementById('startBtn').addEventListener('click', startGame);
+document.addEventListener('keydown', e => { if (e.key === 'Enter') startGame(); });
+		</script>
+	</body>
+</html>
+
