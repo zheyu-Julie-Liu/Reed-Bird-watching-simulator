@@ -471,7 +471,7 @@ scaleCover();
 
 		<script src="demo.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":26632940,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":26632844,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
@@ -495,15 +495,18 @@ if (RESET_PARAM) {
 }
 
 
-// 分包预加载清单（全量）：22 个分包全部在“开始巡护”前下载并挂载完毕。
-// 原因：移动端“游戏运行中流式挂载”实测不可靠（下载了但没挂进引擎），
-// 会造成芦苇素材不全/立绘缺失。全量预载后游戏内不再依赖运行时挂载；
-// 首次加载较长，但成功后浏览器 Cache API 缓存，再次进入秒开。
+// 分包预加载清单：
+// 默认“内存安全档”：背景/植物 + 全部鸟类立绘 + 鸣禽飞行包（约 170MB），
+// 保证手机端不因 270MB 全量入内存被浏览器杀掉；涉禽/游禽/其他鸟的飞行包
+// 不预载，它们以立绘正常出现，飞行姿态等后台挂载成功后再解锁。
+// 完整档：URL 加 ?full=1 时预载全部 22 个分包（适合桌面/好网手机）。
 // 主包名由 GODOT_CONFIG.executable 推导（Godot 4.7 不再替换
-// $GODOT_EXECUTABLE/$GODOT_MAIN_PACK 占位符，只替换 {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":26632940,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4}），
+// $GODOT_EXECUTABLE/$GODOT_MAIN_PACK 占位符，只替换 {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":26632844,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4}），
 // 随导出文件名自适应（demo.html → demo.pck / index.html → index.pck）。
 const MAIN_PACK = GODOT_CONFIG.executable + '.pck';
-const PACK_FILES = [
+const URL_PARAMS = new URLSearchParams(location.search);
+const FULL_PRELOAD = URL_PARAMS.has('full');
+const BASE_PACK_FILES = [
 	MAIN_PACK,
 	'subpackages/backgrounds.pck',
 	'subpackages/reeds.pck',
@@ -522,9 +525,12 @@ const PACK_FILES = [
 	'subpackages/metasequoia.pck',
 	'subpackages/water.pck',
 	'subpackages/songbird_flight.pck','subpackages/songbird_extra_flight.pck',
+];
+const EXTRA_FLIGHT_PACK_FILES = [
 	'subpackages/wader_flight.pck','subpackages/wader_flight_2.pck',
 	'subpackages/swimmer_flight.pck','subpackages/other_flight.pck',
 ];
+const PACK_FILES = BASE_PACK_FILES.concat(FULL_PRELOAD ? EXTRA_FLIGHT_PACK_FILES : []);
 
 var engineReady = false;
 var gameStarted = false;
