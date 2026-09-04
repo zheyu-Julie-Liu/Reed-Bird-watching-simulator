@@ -1,0 +1,45 @@
+name: Deploy to Cloudflare R2
+
+# 放在公开仓库 zheyu-Julie-Liu/Reed-Bird-watching-simulator 的
+# .github/workflows/ 下；仓库根目录本身就是构建产物，push 到 main 即触发。
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install wrangler
+        run: npm install -g wrangler@latest
+
+      - name: Upload changed game files to R2
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ebc829b59c08c144ed977e965c556c5a
+        run: |
+          # push 触发：只上传本次实际变更的游戏文件；手动触发：全量上传
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            FILES=$(find demo.* game_* index.html subpackages -maxdepth 1 -type f 2>/dev/null | sort)
+          else
+            FILES=$(git diff --name-only HEAD~1 HEAD -- 'demo.*' 'game_*' 'index.html' 'subpackages/*' || true)
+          fi
+          if [ -z "$FILES" ]; then
+            echo "没有需要上传的文件"
+            exit 0
+          fi
+          for f in $FILES; do
+            if [ -f "$f" ]; then
+              echo "上传 $f"
+              wrangler r2 object put "reed-bird-game/$f" --file "$f" --remote
+            fi
+          done

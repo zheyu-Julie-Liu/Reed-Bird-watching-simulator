@@ -347,15 +347,19 @@ html, body {
 				<header class="topbar" id="topbar">
 					<div class="brand">
 						<img src="game_logo.webp" alt="logo" />
-						<span class="name">菁灵社·哲思创意</span>
+						<span class="name" id="brandName">菁灵社·哲思创意</span>
 					</div>
 					<div class="version">v1.0.0 · BUILD 2026.08</div>
+					<div id="langSwitch" style="position:absolute;top:14px;right:18px;display:flex;gap:8px;z-index:12;">
+						<button type="button" data-lang="zh" style="border:1px solid rgba(255,255,255,.55);background:rgba(0,0,0,.28);color:#fff;border-radius:999px;padding:3px 12px;font-size:13px;cursor:pointer;">中文</button>
+						<button type="button" data-lang="en" style="border:1px solid rgba(255,255,255,.55);background:rgba(0,0,0,.28);color:#fff;border-radius:999px;padding:3px 12px;font-size:13px;cursor:pointer;">EN</button>
+					</div>
 				</header>
 
 				<main class="stage" id="stage">
-					<h1 class="title">芦苇荡巡护模拟器</h1>
-					<div class="sub-title">湿地科学体验</div>
-					<p class="tagline">踏入湿地 · 细读羽迹 · 守护生灵</p>
+					<h1 class="title" id="mainTitle">芦苇荡巡护模拟器</h1>
+					<div class="sub-title" id="subTitle">湿地科学体验</div>
+					<p class="tagline" id="taglineText">踏入湿地 · 细读羽迹 · 守护生灵</p>
 
 					<div class="divider">
 						<span class="line"></span>
@@ -373,7 +377,7 @@ html, body {
 				</main>
 
 				<footer class="footer" id="footer">
-					<span>&copy; 2026 哲思创意 &middot; 湿地科学巡护体验</span>
+					<span id="footerText">&copy; 2026 哲思创意 &middot; 湿地科学巡护体验</span>
 				</footer>
 			</div>
 		</div>
@@ -382,6 +386,51 @@ html, body {
 
 		<!-- ===== 封面缩放脚本：独立于 Godot 引擎块，导出前预览也能正常缩放 ===== -->
 		<script>
+// ===== 外壳语言切换：选择写入 localStorage，游戏内 Lang 读取同一键 =====
+const SHELL_LANG_KEY = 'reed_lang';
+const SHELL_STRINGS = {
+	zh: {
+		brand: '菁灵社·哲思创意',
+		title: '芦苇荡巡护模拟器',
+		subtitle: '湿地科学体验',
+		tagline: '踏入湿地 · 细读羽迹 · 守护生灵',
+		start: '开始巡护',
+		loading: '加载中…',
+		footer: '© 2026 哲思创意 · 湿地科学巡护体验'
+	},
+	en: {
+		brand: 'Sophi Interactive',
+		title: 'Reed Bird-watching',
+		subtitle: 'Simulator',
+		tagline: 'Step into the wetland · Read the feathers · Guide the wildlife',
+		start: 'Start Patrol',
+		loading: 'Loading…',
+		footer: '© 2026 Sophi Interactive · Wetland Science Patrol Experience'
+	}
+};
+function currentShellLang() {
+	try { return localStorage.getItem(SHELL_LANG_KEY) === 'en' ? 'en' : 'zh'; }
+	catch (e) { return 'zh'; }
+}
+function applyShellLang(lang) {
+	const s = SHELL_STRINGS[lang === 'en' ? 'en' : 'zh'];
+	document.getElementById('brandName').textContent = s.brand;
+	document.getElementById('mainTitle').textContent = s.title;
+	document.getElementById('subTitle').textContent = s.subtitle;
+	document.getElementById('taglineText').textContent = s.tagline;
+	document.getElementById('startLabel').textContent = s.start;
+	document.getElementById('startLoading').textContent = s.loading;
+	document.getElementById('footerText').textContent = s.footer;
+	try { localStorage.setItem(SHELL_LANG_KEY, lang); } catch (e) {}
+}
+const shellBtns = document.querySelectorAll('#langSwitch button[data-lang]');
+shellBtns.forEach(function (b) {
+	b.addEventListener('click', function () {
+		applyShellLang(b.getAttribute('data-lang'));
+		scaleCover();
+	});
+});
+applyShellLang(currentShellLang());
 function scaleCover() {
 	const mask = document.getElementById('coverMask');
 	const inner = document.getElementById('coverInner');
@@ -393,10 +442,9 @@ window.addEventListener('load', scaleCover);
 scaleCover();
 		</script>
 
-		false_TAG
 		<script src="demo.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":26623496,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":26627896,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
@@ -420,20 +468,19 @@ if (RESET_PARAM) {
 }
 
 
-// 分包预加载清单（与 GameManager.SUBPACKAGES 一致）：Web 端分包必须通过
-// preloadFile 预加载进虚拟 FS，否则 GameManager._load_subpackages 报
-// "Missing on web" → 鸟类素材全部缺失（用户：web 壳图片不全、卡加载）。
+// 分包预加载清单：开局必需包 = 主包 + 场景/植物 + 鸟类立绘 +
+// “小型鸣禽”飞行包。保证开局天空里飞的是已就绪的鸣禽；其余飞行包
+// （涉禽/游禽/其他）由 GameManager 在游戏内流式挂载，就绪后才进刷新池。
 // 主包名由 GODOT_CONFIG.executable 推导（Godot 4.7 不再替换
-// $GODOT_EXECUTABLE/$GODOT_MAIN_PACK 占位符，只替换 {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":26623496,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4}），
+// $GODOT_EXECUTABLE/$GODOT_MAIN_PACK 占位符，只替换 {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":26627896,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4}），
 // 随导出文件名自适应（demo.html → demo.pck / index.html → index.pck）。
-// 主包一并预加载，点击"开始巡护"后秒启动
 const MAIN_PACK = GODOT_CONFIG.executable + '.pck';
 const PACK_FILES = [
 	MAIN_PACK,
+	'subpackages/backgrounds.pck',
+	'subpackages/reeds.pck','subpackages/marsh.pck','subpackages/water.pck','subpackages/metasequoia.pck',
 	'subpackages/songbird.pck','subpackages/wader.pck','subpackages/swimmer.pck','subpackages/other.pck',
-	'subpackages/reeds.pck','subpackages/marsh.pck','subpackages/metasequoia.pck','subpackages/water.pck',
-	'subpackages/songbird_flight.pck','subpackages/songbird_extra_flight.pck','subpackages/wader_flight.pck',
-	'subpackages/swimmer_flight.pck','subpackages/other_flight.pck','subpackages/backgrounds.pck',
+	'subpackages/songbird_flight.pck','subpackages/songbird_extra_flight.pck',
 ];
 
 var engineReady = false;
@@ -482,20 +529,55 @@ var gameStarted = false;
 			displayFailureNotice('错误\n运行 Godot Web 项目所需以下功能缺失：\n' + missing.join('\n'));
 		}
 	} else {
-		// 预加载主包+全部分包（fetch → preloadFile 进虚拟 FS）后再 init，
-		// 与 engine.init 并行：下载完即 engineReady，点击"开始巡护"秒启动
-		Promise.all([
-			Promise.all(PACK_FILES.map(file => fetch(file).then(r => {
-				if (!r.ok) throw new Error('Failed to load ' + file + ': HTTP ' + r.status);
-				return r.arrayBuffer();
-			}).then(buf => ({ file, buffer: buf })))),
-			engine.init(GODOT_CONFIG.executable)
-		]).then(results => {
-			const packs = results[0];
-			for (let i = 0; i < packs.length; i++) engine.preloadFile(packs[i].buffer, packs[i].file);
-			engineReady = true;
-			if (gameStarted) startGame();
-		}, displayFailureNotice);
+		// 逐个下载主包+分包子包（不并发、失败自动重试、优先用 Cache API），
+		// 避免 15 个大文件同时下载挤爆连接、一个失败就整体报错。
+		const statusProgress = document.getElementById('status-progress');
+		const PACK_CACHE = 'reed-game-packs-v5';
+		statusProgress.max = PACK_FILES.length;
+		statusProgress.value = 0;
+
+		function fetchWithRetry(file, attempt) {
+			const getBytes = () => {
+				if ('caches' in window) {
+					return caches.open(PACK_CACHE).then(cache => cache.match(file).then(hit => {
+						if (hit) return hit.arrayBuffer();
+						return fetch(file).then(r => {
+							if (!r.ok) throw new Error('Failed to load ' + file + ': HTTP ' + r.status);
+							return r.arrayBuffer();
+						}).then(buf => {
+							try { cache.put(file, new Response(buf, { headers: { 'Content-Type': 'application/octet-stream' } })); }
+							catch (e) { console.warn('Cache put failed:', file, e); }
+							return buf;
+						});
+					}));
+				}
+				return fetch(file).then(r => {
+					if (!r.ok) throw new Error('Failed to load ' + file + ': HTTP ' + r.status);
+					return r.arrayBuffer();
+				});
+			};
+			return getBytes().catch(err => {
+				if (attempt < 5) {
+					const waitMs = 1000 * Math.pow(2, attempt); // 1s → 2s → 4s → 8s → 16s
+					console.warn('下载失败，' + (waitMs / 1000) + 's 后重试: ' + file, err);
+					return new Promise(res => setTimeout(res, waitMs)).then(() => fetchWithRetry(file, attempt + 1));
+				}
+				throw err;
+			});
+		}
+
+		engine.init(GODOT_CONFIG.executable)
+			.then(() => PACK_FILES.reduce(
+				(chain, file) => chain.then(() => fetchWithRetry(file, 0).then(buf => {
+					engine.preloadFile(buf, file);
+					statusProgress.value += 1;
+				})),
+				Promise.resolve()
+			))
+			.then(() => {
+				engineReady = true;
+				if (gameStarted) startGame();
+			}, displayFailureNotice);
 	}
 }());
 
