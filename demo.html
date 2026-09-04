@@ -401,6 +401,8 @@ const SHELL_STRINGS = {
 		footer: '© 2026 Sophi Interactive · Wetland Science Patrol Experience',
 		rotate: 'Landscape recommended for best experience',
 		statusConnecting: 'Connecting to engine and preparing resources…',
+		statusEngine: 'Downloading engine demo.wasm (~39MB). First visit may take a while…',
+		statusEngineSlow: 'Still connecting… If this takes too long, check your network. Downloaded files are cached — refresh to resume.',
 		statusDownloading: 'Downloading resources {done}/{total}: {file}',
 		statusRetry: 'Download failed, retrying in {sec}s: {file}',
 		statusReady: 'Resources ready, starting…'
@@ -415,6 +417,8 @@ const SHELL_STRINGS = {
 		footer: '© 2026 哲思创意 · 湿地科学巡护体验',
 		rotate: '建议横屏浏览，体验更佳',
 		statusConnecting: '正在连接引擎并准备资源…',
+		statusEngine: '正在下载引擎 demo.wasm（约 39MB），首次打开请耐心等待…',
+		statusEngineSlow: '仍在连接引擎……若长时间无进展请检查网络；已下载内容会缓存，刷新可继续。',
 		statusDownloading: '正在下载资源 {done}/{total}：{file}',
 		statusRetry: '下载失败，{sec}s 后重试：{file}',
 		statusReady: '资源就绪，即将开始…'
@@ -608,8 +612,20 @@ var gameStarted = false;
 			});
 		}
 
+		shellStatus('statusEngine');
+		const engineStartTime = Date.now();
+		let engineReadyFlag = false;
+		const engineWatchdog = setInterval(function () {
+			if (engineReadyFlag) { clearInterval(engineWatchdog); return; }
+			if (Date.now() - engineStartTime > 30000) {
+				shellStatus('statusEngineSlow');
+			}
+		}, 10000);
 		engine.init(GODOT_CONFIG.executable)
-			.then(() => PACK_FILES.reduce(
+			.then(() => {
+				engineReadyFlag = true;
+				clearInterval(engineWatchdog);
+				return PACK_FILES.reduce(
 				(chain, file) => chain.then(() => fetchWithRetry(file, 0).then(buf => {
 					engine.preloadFile(buf, file);
 					statusProgress.value += 1;
@@ -617,7 +633,8 @@ var gameStarted = false;
 					return null;
 				})),
 				Promise.resolve()
-			))
+			);
+			})
 			.then(() => {
 				shellStatus('statusReady');
 				engineReady = true;
