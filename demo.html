@@ -373,7 +373,8 @@ html, body {
 							<span class="arrow" id="startArrow">&rarr;</span>
 							<span class="btn-loading" id="startLoading">加载中…</span>
 						</button>
-						<div id="loadHint" style="margin-top:14px;min-height:20px;font-size:14px;color:rgba(255,255,255,.88);text-shadow:0 1px 3px rgba(0,0,0,.6);letter-spacing:.02em;">&nbsp;</div>
+						<div id="loadHint" style="margin-top:18px;min-height:34px;font-size:clamp(18px,3.2vmin,34px);font-weight:600;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.75);letter-spacing:.02em;">&nbsp;</div>
+						<div id="rotateHint" style="margin-top:8px;font-size:clamp(14px,2.4vmin,24px);color:rgba(255,255,255,.85);text-shadow:0 1px 4px rgba(0,0,0,.7);letter-spacing:.03em;">建议横屏浏览，体验更佳 · Landscape recommended for best experience</div>
 					</div>
 				</main>
 
@@ -390,15 +391,6 @@ html, body {
 // ===== 外壳语言切换：选择写入 localStorage，游戏内 Lang 读取同一键 =====
 const SHELL_LANG_KEY = 'reed_lang';
 const SHELL_STRINGS = {
-	zh: {
-		brand: '菁灵社·哲思创意',
-		title: '芦苇荡巡护模拟器',
-		subtitle: '湿地科学体验',
-		tagline: '踏入湿地 · 细读羽迹 · 守护生灵',
-		start: '开始巡护',
-		loading: '加载中…',
-		footer: '© 2026 哲思创意 · 湿地科学巡护体验'
-	},
 	en: {
 		brand: 'Sophi Interactive',
 		title: 'Reed Bird-watching',
@@ -406,15 +398,36 @@ const SHELL_STRINGS = {
 		tagline: 'Step into the wetland · Read the feathers · Guide the wildlife',
 		start: 'Start Patrol',
 		loading: 'Loading…',
-		footer: '© 2026 Sophi Interactive · Wetland Science Patrol Experience'
+		footer: '© 2026 Sophi Interactive · Wetland Science Patrol Experience',
+		rotate: 'Landscape recommended for best experience',
+		statusConnecting: 'Connecting to engine and preparing resources…',
+		statusDownloading: 'Downloading resources {done}/{total}: {file}',
+		statusRetry: 'Download failed, retrying in {sec}s: {file}',
+		statusReady: 'Resources ready, starting…'
+	},
+	zh: {
+		brand: '菁灵社·哲思创意',
+		title: '芦苇荡巡护模拟器',
+		subtitle: '湿地科学体验',
+		tagline: '踏入湿地 · 细读羽迹 · 守护生灵',
+		start: '开始巡护',
+		loading: '加载中…',
+		footer: '© 2026 哲思创意 · 湿地科学巡护体验',
+		rotate: '建议横屏浏览，体验更佳',
+		statusConnecting: '正在连接引擎并准备资源…',
+		statusDownloading: '正在下载资源 {done}/{total}：{file}',
+		statusRetry: '下载失败，{sec}s 后重试：{file}',
+		statusReady: '资源就绪，即将开始…'
 	}
 };
+let shellLang = 'zh';
 function currentShellLang() {
 	try { return localStorage.getItem(SHELL_LANG_KEY) === 'en' ? 'en' : 'zh'; }
 	catch (e) { return 'zh'; }
 }
 function applyShellLang(lang) {
-	const s = SHELL_STRINGS[lang === 'en' ? 'en' : 'zh'];
+	shellLang = lang === 'en' ? 'en' : 'zh';
+	const s = SHELL_STRINGS[shellLang];
 	document.getElementById('brandName').textContent = s.brand;
 	document.getElementById('mainTitle').textContent = s.title;
 	document.getElementById('subTitle').textContent = s.subtitle;
@@ -422,7 +435,16 @@ function applyShellLang(lang) {
 	document.getElementById('startLabel').textContent = s.start;
 	document.getElementById('startLoading').textContent = s.loading;
 	document.getElementById('footerText').textContent = s.footer;
-	try { localStorage.setItem(SHELL_LANG_KEY, lang); } catch (e) {}
+	document.getElementById('rotateHint').textContent = s.rotate;
+	try { localStorage.setItem(SHELL_LANG_KEY, shellLang); } catch (e) {}
+}
+function shellStatus(key, values) {
+	const s = SHELL_STRINGS[shellLang] || SHELL_STRINGS.zh;
+	let t = s[key] || '';
+	if (values) {
+		for (const k in values) t = t.split('{' + k + '}').join(String(values[k]));
+	}
+	document.getElementById('loadHint').textContent = t;
 }
 const shellBtns = document.querySelectorAll('#langSwitch button[data-lang]');
 shellBtns.forEach(function (b) {
@@ -445,7 +467,7 @@ scaleCover();
 
 		<script src="demo.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":26628696,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":26632412,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
@@ -473,7 +495,7 @@ if (RESET_PARAM) {
 // 目标：不开 VPN 时首载尽量短（约 145MB）。其余分包（涉禽/游禽/其他/
 // 其他植物）由 GameManager 在游戏内流式挂载，就绪优先刷新保证不出空鸟。
 // 主包名由 GODOT_CONFIG.executable 推导（Godot 4.7 不再替换
-// $GODOT_EXECUTABLE/$GODOT_MAIN_PACK 占位符，只替换 {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":26628696,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4}），
+// $GODOT_EXECUTABLE/$GODOT_MAIN_PACK 占位符，只替换 {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":26632412,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4}），
 // 随导出文件名自适应（demo.html → demo.pck / index.html → index.pck）。
 const MAIN_PACK = GODOT_CONFIG.executable + '.pck';
 const PACK_FILES = [
@@ -537,7 +559,7 @@ var gameStarted = false;
 		const PACK_CACHE = 'reed-game-packs-v5';
 		statusProgress.max = PACK_FILES.length;
 		statusProgress.value = 0;
-		loadHint.textContent = '正在连接引擎并准备资源…';
+		shellStatus('statusConnecting');
 
 		function fetchWithRetry(file, attempt) {
 			const getBytes = () => {
@@ -563,7 +585,7 @@ var gameStarted = false;
 				if (attempt < 5) {
 					const waitMs = 1000 * Math.pow(2, attempt); // 1s → 2s → 4s → 8s → 16s
 					console.warn('下载失败，' + (waitMs / 1000) + 's 后重试: ' + file, err);
-					loadHint.textContent = '下载失败，' + (waitMs / 1000) + 's 后重试：' + file;
+					shellStatus('statusRetry', { sec: waitMs / 1000, file: file });
 					return new Promise(res => setTimeout(res, waitMs)).then(() => fetchWithRetry(file, attempt + 1));
 				}
 				throw err;
@@ -575,13 +597,13 @@ var gameStarted = false;
 				(chain, file) => chain.then(() => fetchWithRetry(file, 0).then(buf => {
 					engine.preloadFile(buf, file);
 					statusProgress.value += 1;
-					loadHint.textContent = '正在下载资源 ' + statusProgress.value + '/' + PACK_FILES.length + '：' + file;
+					shellStatus('statusDownloading', { done: statusProgress.value, total: PACK_FILES.length, file: file });
 					return null;
 				})),
 				Promise.resolve()
 			))
 			.then(() => {
-				loadHint.textContent = '资源就绪，即将开始…';
+				shellStatus('statusReady');
 				engineReady = true;
 				if (gameStarted) startGame();
 			}, displayFailureNotice);
