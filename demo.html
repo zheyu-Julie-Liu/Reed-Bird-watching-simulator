@@ -514,6 +514,16 @@ const LITE_PACK_FILES = [
 	'subpackages/songbird.pck',
 	'subpackages/songbird_flight.pck','subpackages/songbird_extra_flight.pck',
 ];
+const MID_PACK_FILES = [
+	MAIN_PACK,
+	'subpackages/backgrounds.pck',
+	'subpackages/reeds.pck',
+	'subpackages/reeds_2.pck',
+	'subpackages/reeds_3.pck',
+	'subpackages/reeds_4.pck',
+	'subpackages/songbird.pck',
+	'subpackages/songbird_flight.pck','subpackages/songbird_extra_flight.pck',
+];
 const BASE_PACK_FILES = [
 	MAIN_PACK,
 	'subpackages/backgrounds.pck',
@@ -548,9 +558,12 @@ function detectMobile() {
 	return false;
 }
 const AUTO_MOBILE = !URL_PARAMS.has('full') && !URL_PARAMS.has('lite') && detectMobile();
-// 手机默认 lite（可玩、不崩）；电脑/大屏默认 full（画面完整）。
+// 手机默认 MID（芦苇完整中档，约 145MB）；电脑/大屏默认 full（画面完整）。
 // ?full=1 / ?lite=1 可强制覆盖。
-const PACK_FILES = FULL_PRELOAD || !AUTO_MOBILE ? ALL_PACK_FILES : LITE_PACK_FILES;
+const PACK_FILES = FULL_PRELOAD ? ALL_PACK_FILES
+	: LITE_PRELOAD ? LITE_PACK_FILES
+	: AUTO_MOBILE ? MID_PACK_FILES
+	: ALL_PACK_FILES;
 
 var engineReady = false;
 var gameStarted = false;
