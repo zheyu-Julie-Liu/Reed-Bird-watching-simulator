@@ -496,10 +496,9 @@ if (RESET_PARAM) {
 
 
 // 分包预加载清单：
-// 默认“内存安全档”：背景/植物 + 全部鸟类立绘 + 鸣禽飞行包（约 170MB），
-// 保证手机端不因 270MB 全量入内存被浏览器杀掉；涉禽/游禽/其他鸟的飞行包
-// 不预载，它们以立绘正常出现，飞行姿态等后台挂载成功后再解锁。
-// 完整档：URL 加 ?full=1 时预载全部 22 个分包（适合桌面/好网手机）。
+// 默认 = lite 基线（主包+背景+1 个芦苇包+鸣禽，约 115MB），真机验证可稳定
+// 进入游戏不崩溃；其余分包（植物/其他鸟）由 GameManager 在游戏内流式挂载。
+// 完整档：URL 加 ?full=1 时预载全部 22 个分包（适合桌面/大内存设备）。
 // 主包名由 GODOT_CONFIG.executable 推导（Godot 4.7 不再替换
 // $GODOT_EXECUTABLE/$GODOT_MAIN_PACK 占位符，只替换 {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":26632844,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4}），
 // 随导出文件名自适应（demo.html → demo.pck / index.html → index.pck）。
@@ -539,7 +538,9 @@ const EXTRA_FLIGHT_PACK_FILES = [
 	'subpackages/wader_flight.pck','subpackages/wader_flight_2.pck',
 	'subpackages/swimmer_flight.pck','subpackages/other_flight.pck',
 ];
-const PACK_FILES = LITE_PRELOAD ? LITE_PACK_FILES : BASE_PACK_FILES.concat(FULL_PRELOAD ? EXTRA_FLIGHT_PACK_FILES : []);
+const ALL_PACK_FILES = [MAIN_PACK].concat(BASE_PACK_FILES.slice(1), EXTRA_FLIGHT_PACK_FILES)
+	.filter(function (v, i, a) { return a.indexOf(v) === i; });
+const PACK_FILES = FULL_PRELOAD ? ALL_PACK_FILES : LITE_PACK_FILES;
 
 var engineReady = false;
 var gameStarted = false;
