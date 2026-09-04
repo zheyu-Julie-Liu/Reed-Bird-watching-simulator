@@ -506,6 +506,15 @@ if (RESET_PARAM) {
 const MAIN_PACK = GODOT_CONFIG.executable + '.pck';
 const URL_PARAMS = new URLSearchParams(location.search);
 const FULL_PRELOAD = URL_PARAMS.has('full');
+const LITE_PRELOAD = URL_PARAMS.has('lite');
+const NO_CACHE = URL_PARAMS.has('nocache');
+const LITE_PACK_FILES = [
+	MAIN_PACK,
+	'subpackages/backgrounds.pck',
+	'subpackages/reeds.pck',
+	'subpackages/songbird.pck',
+	'subpackages/songbird_flight.pck','subpackages/songbird_extra_flight.pck',
+];
 const BASE_PACK_FILES = [
 	MAIN_PACK,
 	'subpackages/backgrounds.pck',
@@ -530,7 +539,7 @@ const EXTRA_FLIGHT_PACK_FILES = [
 	'subpackages/wader_flight.pck','subpackages/wader_flight_2.pck',
 	'subpackages/swimmer_flight.pck','subpackages/other_flight.pck',
 ];
-const PACK_FILES = BASE_PACK_FILES.concat(FULL_PRELOAD ? EXTRA_FLIGHT_PACK_FILES : []);
+const PACK_FILES = LITE_PRELOAD ? LITE_PACK_FILES : BASE_PACK_FILES.concat(FULL_PRELOAD ? EXTRA_FLIGHT_PACK_FILES : []);
 
 var engineReady = false;
 var gameStarted = false;
@@ -589,7 +598,7 @@ var gameStarted = false;
 
 		function fetchWithRetry(file, attempt) {
 			const getBytes = () => {
-				if ('caches' in window) {
+				if ('caches' in window && !NO_CACHE) {
 					return caches.open(PACK_CACHE).then(cache => cache.match(file).then(hit => {
 						if (hit) return hit.arrayBuffer();
 						return fetch(file).then(r => {
