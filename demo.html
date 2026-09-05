@@ -471,7 +471,7 @@ scaleCover();
 
 		<script src="demo.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":26633020,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":26650336,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
@@ -500,13 +500,16 @@ if (RESET_PARAM) {
 // 进入游戏不崩溃；其余分包（植物/其他鸟）由 GameManager 在游戏内流式挂载。
 // 完整档：URL 加 ?full=1 时预载全部 22 个分包（适合桌面/大内存设备）。
 // 主包名由 GODOT_CONFIG.executable 推导（Godot 4.7 不再替换
-// $GODOT_EXECUTABLE/$GODOT_MAIN_PACK 占位符，只替换 {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":26633020,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4}），
+// $GODOT_EXECUTABLE/$GODOT_MAIN_PACK 占位符，只替换 {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":26650336,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4}），
 // 随导出文件名自适应（demo.html → demo.pck / index.html → index.pck）。
 const MAIN_PACK = GODOT_CONFIG.executable + '.pck';
 const URL_PARAMS = new URLSearchParams(location.search);
 const FULL_PRELOAD = URL_PARAMS.has('full');
 const LITE_PRELOAD = URL_PARAMS.has('lite');
-const NO_CACHE = URL_PARAMS.has('nocache');
+// 默认不走 Cache API：实测本地/线上黑屏源于 Cache API 读写（?nocache=1 可玩）。
+// 资源改为依赖浏览器 HTTP 缓存（Worker 已返回 Cache-Control/ETag），
+// 需要显式启用 Cache API 时加 ?cache=1。
+const NO_CACHE = !URL_PARAMS.has('cache');
 const LITE_PACK_FILES = [
 	MAIN_PACK,
 	'subpackages/backgrounds.pck',
