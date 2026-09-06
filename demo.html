@@ -471,7 +471,7 @@ scaleCover();
 
 		<script src="demo.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":26650336,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":25302208,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
@@ -500,7 +500,7 @@ if (RESET_PARAM) {
 // 进入游戏不崩溃；其余分包（植物/其他鸟）由 GameManager 在游戏内流式挂载。
 // 完整档：URL 加 ?full=1 时预载全部 22 个分包（适合桌面/大内存设备）。
 // 主包名由 GODOT_CONFIG.executable 推导（Godot 4.7 不再替换
-// $GODOT_EXECUTABLE/$GODOT_MAIN_PACK 占位符，只替换 {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":26650336,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4}），
+// $GODOT_EXECUTABLE/$GODOT_MAIN_PACK 占位符，只替换 {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":25302208,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4}），
 // 随导出文件名自适应（demo.html → demo.pck / index.html → index.pck）。
 const MAIN_PACK = GODOT_CONFIG.executable + '.pck';
 const URL_PARAMS = new URLSearchParams(location.search);
@@ -510,6 +510,34 @@ const LITE_PRELOAD = URL_PARAMS.has('lite');
 // 资源改为依赖浏览器 HTTP 缓存（Worker 已返回 Cache-Control/ETag），
 // 需要显式启用 Cache API 时加 ?cache=1。
 const NO_CACHE = !URL_PARAMS.has('cache');
+
+// ===== gzip 传输层（EdgeOne 等单文件<25MB 平台适配）=====
+// 原理：服务器上只存 *.wasm.gz / *.pck.gz（体积约 1/4）；此处包装 fetch，
+// 引擎/壳请求原文件名时自动改取 .gz 并用 DecompressionStream 解压返回。
+// 对上层（engine.init 的 wasm 下载、preloadFile 的 pck 下载、游戏运行时
+// subpackages 挂载）完全透明。?nogz=1 可禁用（调试）；.gz 404 自动回退原文件。
+const GZ_LAYER = !URL_PARAMS.has('nogz') && typeof DecompressionStream !== 'undefined';
+if (GZ_LAYER) {
+	const origFetch = window.fetch.bind(window);
+	window.fetch = function (input, init) {
+		const url = (typeof input === 'string') ? input : (input && input.url) || '';
+		let path = '';
+		try { path = new URL(url, location.href).pathname; } catch (e) { path = url; }
+		if (!/\.wasm$|\.pck$/.test(path)) return origFetch(input, init);
+		return origFetch(url + '.gz', init).then(function (resp) {
+			if (!resp.ok) {
+				// .gz 不存在（如本地调试只放了原文件）：回退原样请求
+				return origFetch(input, init);
+			}
+			const ds = new DecompressionStream('gzip');
+			const mime = path.endsWith('.wasm') ? 'application/wasm' : 'application/octet-stream';
+			return new Response(resp.body.pipeThrough(ds), {
+				status: 200, headers: { 'Content-Type': mime },
+			});
+		});
+	};
+}
+
 const LITE_PACK_FILES = [
 	MAIN_PACK,
 	'subpackages/backgrounds.pck',
