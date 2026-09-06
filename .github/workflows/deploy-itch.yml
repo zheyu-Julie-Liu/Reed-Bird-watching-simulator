@@ -1,0 +1,35 @@
+name: Deploy to itch.io
+
+# push 到 main 自动同步 itch.io（HTML5 渠道）。
+# 前置：仓库 Secrets 需配置 BUTLER_API_KEY（itch.io → dashboard → API keys 生成）。
+# 未配置时自动跳过（不报错、不发失败邮件）。
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check BUTLER_API_KEY
+        id: chk
+        run: echo "has_key=${{ secrets.BUTLER_API_KEY != '' }}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up butler
+        if: steps.chk.outputs.has_key == 'true'
+        uses: jdno/setup-butler@v1
+
+      - name: Stage itch build
+        if: steps.chk.outputs.has_key == 'true'
+        run: |
+          mkdir -p /tmp/itch
+          rsync -a --exclude='.github' --exclude='.git' ./ /tmp/itch/
+
+      - name: Deploy to itch.io
+        if: steps.chk.outputs.has_key == 'true'
+        run: butler push /tmp/itch zheyu-julie/reed-bird-watching-simulator:html5
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
