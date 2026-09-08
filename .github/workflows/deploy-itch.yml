@@ -1,8 +1,8 @@
-name: Deploy to itch.io
+# ⚠️ 暂停开关（boss 指示 2026-09-08）：itch 账户被标记机器人，解封前此 workflow 保持停用。
+# 恢复方法：git revert 本次提交，或手动删掉下面的 if 守卫。
+# 原步骤已封存于提交历史（butler push build/web → zheyu-julie/reed-bird-watching-simulator:html5）。
 
-# push 到 main 自动同步 itch.io（HTML5 渠道）。
-# 前置：仓库 Secrets 需配置 BUTLER_API_KEY（itch.io → dashboard → API keys 生成）。
-# 未配置时自动跳过（不报错、不发失败邮件）。
+name: Deploy to itch.io (PAUSED)
 
 on:
   push:
@@ -10,26 +10,8 @@ on:
 
 jobs:
   deploy:
+    if: false
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Check BUTLER_API_KEY
-        id: chk
-        run: echo "has_key=${{ secrets.BUTLER_API_KEY != '' }}" >> "$GITHUB_OUTPUT"
-
-      - name: Set up butler
-        if: steps.chk.outputs.has_key == 'true'
-        uses: jdno/setup-butler@v1
-
-      - name: Stage itch build
-        if: steps.chk.outputs.has_key == 'true'
-        run: |
-          mkdir -p /tmp/itch
-          rsync -a --exclude='.github' --exclude='.git' ./ /tmp/itch/
-
-      - name: Deploy to itch.io
-        if: steps.chk.outputs.has_key == 'true'
-        run: butler push /tmp/itch zheyu-julie/reed-bird-watching-simulator:html5
-        env:
-          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+      - name: itch 更新暂停中
+        run: echo "itch 通道已由 boss 指示暂停（防机器人标记升级）。解封：git revert 熔断提交后恢复原 workflow。"
