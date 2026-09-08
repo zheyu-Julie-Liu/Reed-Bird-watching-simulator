@@ -1,5 +1,6 @@
-# ⚠️ 暂停开关（boss 指示 2026-09-08）：itch 账户被标记机器人，解封前此 workflow 保持停用。
-# 恢复方法：git revert 本次提交，或手动删掉下面的 if 守卫。
+# ⚠️ itch 频率政策（boss 指示 2026-09-08）：itch 账户被标记机器人，解封前此 workflow 保持停用；
+# 解封后恢复本 workflow，且 itch 更新频率上限 = 每周一次（攒批推送，禁止逐 fix 连发）。
+# 恢复方法：git revert 熔断提交，或手动删掉下面的 if 守卫。
 # 原步骤已封存于提交历史（butler push build/web → zheyu-julie/reed-bird-watching-simulator:html5）。
 
 name: Deploy to itch.io (PAUSED)
