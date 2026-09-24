@@ -470,8 +470,9 @@ scaleCover();
 		</script>
 
 		<script src="demo.js"></script>
+		<script src="audio_embed.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":25328940,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":25415828,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
@@ -500,7 +501,7 @@ if (RESET_PARAM) {
 // 进入游戏不崩溃；其余分包（植物/其他鸟）由 GameManager 在游戏内流式挂载。
 // 完整档：URL 加 ?full=1 时预载全部 22 个分包（适合桌面/大内存设备）。
 // 主包名由 GODOT_CONFIG.executable 推导（Godot 4.7 不再替换
-// $GODOT_EXECUTABLE/$GODOT_MAIN_PACK 占位符，只替换 {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":25328940,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4}），
+// $GODOT_EXECUTABLE/$GODOT_MAIN_PACK 占位符，只替换 {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":25415828,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4}），
 // 随导出文件名自适应（demo.html → demo.pck / index.html → index.pck）。
 const MAIN_PACK = GODOT_CONFIG.executable + '.pck';
 const URL_PARAMS = new URLSearchParams(location.search);
@@ -737,6 +738,21 @@ function startGame() {
 
 document.getElementById('startBtn').addEventListener('click', startGame);
 document.addEventListener('keydown', e => { if (e.key === 'Enter') startGame(); });
+		</script>
+
+		<!-- ===== T-0052 访问分析（推送解冻后随包生效）=====
+		     ①CF Web Analytics（免费/无 Cookie/无 PII）：token 由 boss 在 CF dashboard
+		     「Analytics & Logs → Web Analytics → Add a site」创建后替换下方 REPLACE_TOKEN。
+		     上线即有：访问时长、国别/城市（IP 来源粒度=地理/ASN，CF 不暴露原始 IP）、
+		     来源 referrer（小红书外链会显示 xiaohongshu.com）、设备分布。
+		     ②来源渠道标记：带参链接 ?src=xhs（小红书笔记）/ ?src=exhibit（展板二维码）/
+		     无参数=自然流量；Phase 2 可接 Worker 信标做精确渠道归因与会话心跳。 -->
+		<script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "8b1deb57ca7849d2a40a2eda8f427092"}'></script>
+		<script>
+		try {
+			var src = new URLSearchParams(location.search).get('src');
+			if (src) localStorage.setItem('rw_traffic_src', src);
+		} catch (e) {}
 		</script>
 	</body>
 </html>
