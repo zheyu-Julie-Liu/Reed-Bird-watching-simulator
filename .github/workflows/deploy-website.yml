@@ -41,24 +41,6 @@ jobs:
           set -o pipefail
           wrangler pages deploy site --project-name=zhesi-website --branch=main --commit-dirty=true 2>&1 | tee /tmp/cf_deploy.log
 
-      - name: Publish deploy log to deploy-log branch
-        if: always()
-        run: |
-          cd site
-          git config user.email "deploy-bot@users.noreply.github.com"
-          git config user.name "deploy-bot"
-          git remote add logrepo https://x-access-token:${{ github.token }}@github.com/zheyu-Julie-Liu/Reed-Bird-watching-simulator.git
-          git fetch logrepo deploy-log || true
-          git checkout -b deploy-log $(git rev-parse --verify logrepo/deploy-log 2>/dev/null || echo HEAD) 2>/dev/null
-          git rm -rf . 2>/dev/null || true
-          git clean -fd 2>/dev/null || true
-          {
-            echo "# deploy run $(date -u +%FT%TZ)"
-            echo "## create"; cat /tmp/cf_create.log 2>/dev/null
-            echo "## deploy"; cat /tmp/cf_deploy.log 2>/dev/null
-          } > deploy.log
-          git add deploy.log && git commit -m "deploy log" && git push logrepo deploy-log
-
       - name: Attach production domain (apex CNAME)
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
