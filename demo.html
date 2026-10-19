@@ -374,7 +374,7 @@ html, body {
 							<span class="btn-loading" id="startLoading">加载中…</span>
 						</button>
 						<div id="loadHint" style="margin-top:18px;min-height:34px;font-size:clamp(18px,3.2vmin,34px);font-weight:600;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.75);letter-spacing:.02em;">&nbsp;</div>
-						<div id="rotateHint" style="margin-top:8px;font-size:clamp(14px,2.4vmin,24px);color:rgba(255,255,255,.85);text-shadow:0 1px 4px rgba(0,0,0,.7);letter-spacing:.03em;">建议横屏浏览，体验更佳 · Landscape recommended for best experience</div>
+						<div id="rotateHint" style="margin-top:8px;font-size:clamp(14px,2.4vmin,24px);color:rgba(255,255,255,.85);text-shadow:0 1px 4px rgba(0,0,0,.7);letter-spacing:.03em;">当前支持电脑浏览器 · Desktop browsers only</div>
 					</div>
 				</main>
 
@@ -399,7 +399,7 @@ const SHELL_STRINGS = {
 		start: 'Start Patrol',
 		loading: 'Loading…',
 		footer: '© 2026 Sophi Interactive · Wetland Science Patrol Experience',
-		rotate: 'Landscape recommended for best experience',
+		rotate: 'Desktop browsers only; mobile support is not available yet',
 		statusConnecting: 'Connecting to engine and preparing resources…',
 		statusEngine: 'Downloading engine demo.wasm (~39MB). First visit may take a while…',
 		statusEngineSlow: 'Still connecting… If this takes too long, check your network. Downloaded files are cached — refresh to resume.',
@@ -415,7 +415,7 @@ const SHELL_STRINGS = {
 		start: '开始巡护',
 		loading: '加载中…',
 		footer: '© 2026 哲思创意 · 湿地科学巡护体验',
-		rotate: '建议横屏浏览，体验更佳',
+		rotate: '当前仅支持电脑浏览器，暂不支持手机',
 		statusConnecting: '正在连接引擎并准备资源…',
 		statusEngine: '正在下载引擎 demo.wasm（约 39MB），首次打开请耐心等待…',
 		statusEngineSlow: '仍在连接引擎……若长时间无进展请检查网络；已下载内容会缓存，刷新可继续。',
@@ -472,7 +472,7 @@ scaleCover();
 		<script src="demo.js"></script>
 		<script src="audio_embed.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":12206548,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":4341848,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
@@ -496,17 +496,10 @@ if (RESET_PARAM) {
 }
 
 
-// 分包预加载清单：
-// 默认 = lite 基线（主包+背景+1 个芦苇包+鸣禽，约 115MB），真机验证可稳定
-// 进入游戏不崩溃；其余分包（植物/其他鸟）由 GameManager 在游戏内流式挂载。
-// 完整档：URL 加 ?full=1 时预载全部 22 个分包（适合桌面/大内存设备）。
-// 主包名由 GODOT_CONFIG.executable 推导（Godot 4.7 不再替换
-// $GODOT_EXECUTABLE/$GODOT_MAIN_PACK 占位符，只替换 {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":12206548,"index.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4}），
-// 随导出文件名自适应（demo.html → demo.pck / index.html → index.pck）。
+// 当前发布：只包含已启用的成鸟资源；电脑在开局前完成全部分包加载。
+// 手机版尚未通过内存验证，在初始化引擎前拦截，不走边玩边下载。
 const MAIN_PACK = GODOT_CONFIG.executable + '.pck';
 const URL_PARAMS = new URLSearchParams(location.search);
-const FULL_PRELOAD = URL_PARAMS.has('full');
-const LITE_PRELOAD = URL_PARAMS.has('lite');
 // 默认不走 Cache API：实测本地/线上黑屏源于 Cache API 读写（?nocache=1 可玩）。
 // 资源改为依赖浏览器 HTTP 缓存（Worker 已返回 Cache-Control/ETag），
 // 需要显式启用 Cache API 时加 ?cache=1。
@@ -517,6 +510,22 @@ const NO_CACHE = !URL_PARAMS.has('cache');
 // 引擎/壳请求原文件名时自动改取 .gz 并用 DecompressionStream 解压返回。
 // 对上层（engine.init 的 wasm 下载、preloadFile 的 pck 下载、游戏运行时
 // subpackages 挂载）完全透明。?nogz=1 可禁用（调试）；.gz 404 自动回退原文件。
+// 发布工具按文件内容填入版本号，避免新主包与浏览器缓存的旧分包混用。
+const RESOURCE_VERSIONS = {"demo.pck":"e8c2808dbdfbb87b","demo.wasm":"7eda98958eb09135","subpackages/backgrounds.pck":"827c918c5e6dddf2","subpackages/marsh.pck":"fd6c4492b77bf45a","subpackages/marsh_2.pck":"a68e1296e8cfe561","subpackages/metasequoia.pck":"24a0e466047130be","subpackages/other.pck":"5db64b7cdb07b5f9","subpackages/other_flight.pck":"a5a87293497fd774","subpackages/reeds.pck":"ff669b80dda6dc38","subpackages/reeds_2.pck":"a3dd55832d1e8783","subpackages/reeds_3.pck":"6a9707e7e28bf83e","subpackages/reeds_4.pck":"6d8567736eebe106","subpackages/songbird.pck":"6b17f0a896913c8f","subpackages/songbird_extra_flight.pck":"d5bd356371cdd01e","subpackages/songbird_flight.pck":"c4dd4e18363506cc","subpackages/swimmer.pck":"39d360fa6ff1a935","subpackages/swimmer_2.pck":"b3fbb4b5bf3355b5","subpackages/swimmer_3.pck":"ffde5675b1f58243","subpackages/swimmer_flight.pck":"02e2a170bac0b4be","subpackages/wader.pck":"a7618087bfa7923e","subpackages/wader_2.pck":"da3f529d036d8765","subpackages/wader_flight.pck":"2fb77ecd5f3e9798","subpackages/wader_flight_2.pck":"0ff9a07c0fbb5329","subpackages/water.pck":"adc8262a8c0647d7"};
+(function () {
+	const transport = window.fetch.bind(window);
+	window.fetch = function (input, init) {
+		const text = typeof input === 'string' ? input : input && input.url;
+		if (!text) return transport(input, init);
+		const url = new URL(text, location.href);
+		const base = new URL('.', location.href);
+		if (url.origin !== base.origin || !url.pathname.startsWith(base.pathname)) return transport(input, init);
+		const key = url.pathname.slice(base.pathname.length).replace(/\.gz$/, '');
+		if (!RESOURCE_VERSIONS[key]) return transport(input, init);
+		url.searchParams.set('v', RESOURCE_VERSIONS[key]);
+		return transport(typeof input === 'string' ? url.href : new Request(url.href, input), init);
+	};
+}());
 const GZ_LAYER = !URL_PARAMS.has('nogz') && typeof DecompressionStream !== 'undefined';
 if (GZ_LAYER) {
 	const origFetch = window.fetch.bind(window);
@@ -539,29 +548,8 @@ if (GZ_LAYER) {
 	};
 }
 
-const LITE_PACK_FILES = [
-	MAIN_PACK,
-	'subpackages/backgrounds.pck',
-	'subpackages/reeds.pck',
-	'subpackages/songbird.pck',
-	'subpackages/songbird_flight.pck','subpackages/songbird_extra_flight.pck',
-];
-const MID_PACK_FILES = [
-	MAIN_PACK,
-	'subpackages/backgrounds.pck',
-	'subpackages/reeds.pck',
-	'subpackages/reeds_2.pck',
-	'subpackages/reeds_3.pck',
-	'subpackages/reeds_4.pck',
-	'subpackages/songbird.pck',
-	'subpackages/songbird_flight.pck','subpackages/songbird_extra_flight.pck',
-];
 const BASE_PACK_FILES = [
 	MAIN_PACK,
-	'subpackages/reed_stand.pck',
-	'subpackages/reed_stand_2.pck',
-	'subpackages/reed_stand_3.pck',
-	'subpackages/reed_stand_4.pck',
 	'subpackages/backgrounds.pck',
 	'subpackages/reeds.pck',
 	'subpackages/reeds_2.pck',
@@ -593,13 +581,9 @@ function detectMobile() {
 	} catch (e) {}
 	return false;
 }
-const AUTO_MOBILE = !URL_PARAMS.has('full') && !URL_PARAMS.has('lite') && detectMobile();
-// 手机默认 MID（芦苇完整中档，约 145MB）；电脑/大屏默认 full（画面完整）。
-// ?full=1 / ?lite=1 可强制覆盖。
-const PACK_FILES = FULL_PRELOAD ? ALL_PACK_FILES
-	: LITE_PRELOAD ? LITE_PACK_FILES
-	: AUTO_MOBILE ? MID_PACK_FILES
-	: ALL_PACK_FILES;
+// 当前仅支持电脑。手机在引擎初始化前停止，full/lite 参数不绕过设备门禁。
+const IS_MOBILE_DEVICE = detectMobile();
+const PACK_FILES = ALL_PACK_FILES;
 
 var engineReady = false;
 var gameStarted = false;
@@ -633,6 +617,13 @@ var gameStarted = false;
 		initializing = false;
 	}
 
+	if (IS_MOBILE_DEVICE) {
+		document.getElementById('startBtn').disabled = true;
+		displayFailureNotice(shellLang === 'en'
+			? 'This version supports desktop browsers. Mobile support will follow after memory optimization and device testing.'
+			: '当前版本仅支持电脑浏览器。手机版将在完成内存优化与真机验证后开放。');
+		return;
+	}
 	const missing = Engine.getMissingFeatures({ threads: GODOT_THREADS_ENABLED });
 	if (missing.length !== 0) {
 		if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] && 'serviceWorker' in navigator) {

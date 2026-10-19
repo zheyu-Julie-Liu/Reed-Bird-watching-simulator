@@ -1,11 +1,13 @@
 name: Deploy to Cloudflare R2
 
-# 放在公开仓库 zheyu-Julie-Liu/Reed-Bird-watching-simulator 的
-# .github/workflows/ 下；仓库根目录本身就是构建产物，push 到 main 即触发。
 on:
   push:
     branches: [main]
   workflow_dispatch:
+
+concurrency:
+  group: desktop-game-release
+  cancel-in-progress: false
 
 jobs:
   upload:
@@ -14,42 +16,61 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-
+      - name: Verify complete runtime budget and manifest
+        run: |
+          node <<'JS'
+          const fs = require('node:fs');
+          const crypto = require('node:crypto');
+          const cp = require('node:child_process');
+          const m = JSON.parse(fs.readFileSync('game_manifest.json'));
+          let total = 0;
+          const allowed = new Set(['index.html', 'game_manifest.json']);
+          for (const f of m.files) {
+            const bytes = fs.readFileSync(f.path);
+            if (bytes.length !== f.bytes || crypto.createHash('sha256').update(bytes).digest('hex') !== f.sha256) throw Error('Manifest mismatch: ' + f.path);
+            allowed.add(f.path); total += bytes.length;
+          }
+          if (total !== m.runtime_raw_bytes || total > 100000000 || !m.desktop_only || m.adult_species !== 77) throw Error('Runtime release budget/policy failed');
+          const files = cp.execFileSync('git', ['ls-files', '--', 'demo.*', 'game_*', 'index.html', 'subpackages/*', 'audio/*', 'audio_embed.js'], {encoding:'utf8'}).trim().split('\n');
+          for (const f of files) if (f && !allowed.has(f)) throw Error('Undeclared runtime file: ' + f);
+          console.log('Verified runtime bytes:', total);
+          JS
       - name: Install wrangler
         run: npm install -g wrangler@latest
-
-      - name: Upload changed game files to R2
+      - name: Upload verified desktop release and remove unused resources
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ebc829b59c08c144ed977e965c556c5a
         run: |
-          # push 触发：只上传本次实际变更的游戏文件；手动触发：全量上传
+          set -euo pipefail
+          BASE="${{ github.event.before }}"
+          if ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then BASE=HEAD~1; fi
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            FILES=$(find demo.* game_* index.html audio_embed.js subpackages audio -type f 2>/dev/null | sort)
+            FILES=$(node -e 'const m=require("./game_manifest.json"); console.log(m.files.map(f=>f.path).concat(["index.html","game_manifest.json"]).join("\n"))')
           else
-            FILES=$(git diff --name-only HEAD~1 HEAD -- 'demo.*' 'game_*' 'index.html' 'audio_embed.js' 'subpackages/*' 'audio/*' || true)
+            FILES=$(git diff --name-only --diff-filter=ACMRT "$BASE" HEAD -- 'demo.*' 'game_*' 'index.html' 'audio_embed.js' 'subpackages/*' 'audio/*')
           fi
-          if [ -z "$FILES" ]; then
-            echo "没有需要上传的文件"
-            exit 0
-          fi
-          # 先同步资源（最多 4 个并行），最后更新主包和网页入口。
-          ASSETS=$(printf '%s\n' "$FILES" | grep -Ev '^(demo\.(html|pck)|index\.html)$' || true)
+          ASSETS=$(printf '%s\n' "$FILES" | grep -Ev '^(demo\.(html|pck)|index\.html|game_manifest\.json)$' || true)
           if [ -n "$ASSETS" ]; then
             printf '%s\n' "$ASSETS" | xargs -r -d '\n' -P 4 -n 1 bash -c '
-              if [ -f "$1" ]; then
-                echo "上传 $1"
-                wrangler r2 object put "reed-bird-game/$1" --file "$1" --remote
-              fi
+              echo "上传 $1"
+              wrangler r2 object put "reed-bird-game/$1" --file "$1" --remote
             ' _
           fi
           for f in demo.pck demo.html index.html; do
-            if printf '%s\n' "$FILES" | grep -Fxq "$f" && [ -f "$f" ]; then
-              echo "上传 $f"
+            if printf '%s\n' "$FILES" | grep -Fxq "$f"; then
               wrangler r2 object put "reed-bird-game/$f" --file "$f" --remote
             fi
           done
+          # 新资源与入口就绪后，清理此前误发的备用资源。
+          DELETED=$(git diff --name-only --diff-filter=D "$BASE" HEAD -- 'subpackages/*' 'audio/*')
+          if [ -n "$DELETED" ]; then
+            printf '%s\n' "$DELETED" | xargs -r -d '\n' -P 4 -n 1 bash -c '
+              echo "移除未启用资源 $1"
+              wrangler r2 object delete "reed-bird-game/$1" --remote
+            ' _
+          fi
+          wrangler r2 object put reed-bird-game/game_manifest.json --file game_manifest.json --remote

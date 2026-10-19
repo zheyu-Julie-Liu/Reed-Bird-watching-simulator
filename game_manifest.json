@@ -1,0 +1,181 @@
+{
+  "release": "2026-10-20-desktop-adults",
+  "desktop_only": true,
+  "adult_species": 77,
+  "subpackages": 22,
+  "runtime_raw_bytes": 83542194,
+  "gzip_estimate_bytes": 52260494,
+  "budget_bytes": 100000000,
+  "files": [
+    {
+      "path": "audio_embed.js",
+      "bytes": 1668866,
+      "sha256": "94cfec186142e86797410fada6cabf298a8db3bb6bcc2472cc867aced09455b2"
+    },
+    {
+      "path": "demo.apple-touch-icon.png",
+      "bytes": 11929,
+      "sha256": "3b26f608cccdebe8006a7309a1da219cafa5e29304055bed7b8eb8a3b6825938"
+    },
+    {
+      "path": "demo.audio.position.worklet.js",
+      "bytes": 2973,
+      "sha256": "be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8"
+    },
+    {
+      "path": "demo.audio.worklet.js",
+      "bytes": 7298,
+      "sha256": "5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3"
+    },
+    {
+      "path": "demo.html",
+      "bytes": 27502,
+      "sha256": "e95e77fc8220e76f768d707f89456b4e9641306beb46ba6f10f31fe64d8e9d79"
+    },
+    {
+      "path": "demo.icon.png",
+      "bytes": 5769,
+      "sha256": "0f7988acc72fcb26c666c5cf10f3aebbfc0ac73ad2322c73ea832ea5f7f3cf8f"
+    },
+    {
+      "path": "demo.js",
+      "bytes": 279815,
+      "sha256": "68586d6daafc93c6e697b3fb258976874aa7459b8931165ebb1dc3c9614cc42c"
+    },
+    {
+      "path": "demo.pck",
+      "bytes": 4341848,
+      "sha256": "e8c2808dbdfbb87bb386d243debb85fb66004aef11f71f8a4d5aacc566ac90ae"
+    },
+    {
+      "path": "demo.png",
+      "bytes": 21443,
+      "sha256": "3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e"
+    },
+    {
+      "path": "demo.wasm",
+      "bytes": 39509339,
+      "sha256": "7eda98958eb09135a1acb54a4323a00b1a55af1997f15fa1cdc2b93e3df46656"
+    },
+    {
+      "path": "game_cover.webp",
+      "bytes": 1016340,
+      "sha256": "c34f8dc3b7bcd798507717c531ebe4953395be69df9ea1e8b7b98d8afc11e31f"
+    },
+    {
+      "path": "game_logo.webp",
+      "bytes": 404060,
+      "sha256": "59f993d08ce3313dcacc06f6f89704bf1cfc0ce06c72f3144e9f5d5e2997f7c5"
+    },
+    {
+      "path": "subpackages/backgrounds.pck",
+      "bytes": 884592,
+      "sha256": "827c918c5e6dddf29f6c5df31d2134e92f899147da9233984f966b751e29c6d1"
+    },
+    {
+      "path": "subpackages/marsh.pck",
+      "bytes": 808980,
+      "sha256": "fd6c4492b77bf45a88bb710ad653986a9c291d1e52acccd36d5cefcdce09d10b"
+    },
+    {
+      "path": "subpackages/marsh_2.pck",
+      "bytes": 1635296,
+      "sha256": "a68e1296e8cfe561355facc37d66495ed87693925d2388574594a9aed5137e31"
+    },
+    {
+      "path": "subpackages/metasequoia.pck",
+      "bytes": 840616,
+      "sha256": "24a0e466047130beaea680d6b10c9415ca3cbcaf82d73e48f03a2bb58d1b8314"
+    },
+    {
+      "path": "subpackages/other.pck",
+      "bytes": 1243672,
+      "sha256": "5db64b7cdb07b5f9d8516df19c4663a20366776b2822035661f9abc68d3b6b6a"
+    },
+    {
+      "path": "subpackages/other_flight.pck",
+      "bytes": 2892892,
+      "sha256": "a5a87293497fd774859b3279a7f6774f3c3de677ddd1aec960ec3c52f591e7d0"
+    },
+    {
+      "path": "subpackages/reeds.pck",
+      "bytes": 1035472,
+      "sha256": "ff669b80dda6dc381a07a9e39b8d158c66c580092c907ff0f672d81b8665d95d"
+    },
+    {
+      "path": "subpackages/reeds_2.pck",
+      "bytes": 2253700,
+      "sha256": "a3dd55832d1e8783fab2ae76e86b352768fbe5241d7f90f978cca5f3b3342db3"
+    },
+    {
+      "path": "subpackages/reeds_3.pck",
+      "bytes": 1666408,
+      "sha256": "6a9707e7e28bf83eab4b667be6cb1db3045982a4f07f1ca4c407c61331ef1d44"
+    },
+    {
+      "path": "subpackages/reeds_4.pck",
+      "bytes": 1679172,
+      "sha256": "6d8567736eebe1068ff0f97c4bd13c686d454e0baa6544c1c5f182781623a787"
+    },
+    {
+      "path": "subpackages/songbird.pck",
+      "bytes": 1561896,
+      "sha256": "6b17f0a896913c8f80f764d4f87e6eaba06eaa4a50ed470939d5bf4bb7edf233"
+    },
+    {
+      "path": "subpackages/songbird_extra_flight.pck",
+      "bytes": 3454012,
+      "sha256": "d5bd356371cdd01e9baeb2db4c635518425321d4fb11918e084e65a60f2e3f70"
+    },
+    {
+      "path": "subpackages/songbird_flight.pck",
+      "bytes": 2467128,
+      "sha256": "c4dd4e18363506ccf295cf999d879de5bd2b1980a7105396296f8100db195874"
+    },
+    {
+      "path": "subpackages/swimmer.pck",
+      "bytes": 1622204,
+      "sha256": "39d360fa6ff1a935d25da9cf94f06cec0d78158f8ef131310f160c17eb28d008"
+    },
+    {
+      "path": "subpackages/swimmer_2.pck",
+      "bytes": 399000,
+      "sha256": "b3fbb4b5bf3355b5ef954541f2c464736761b350270d031f162e2e4b1d0c01f4"
+    },
+    {
+      "path": "subpackages/swimmer_3.pck",
+      "bytes": 712112,
+      "sha256": "ffde5675b1f582434bddc9a03d7b97516086d930bdf25fbc396fd88e480b831c"
+    },
+    {
+      "path": "subpackages/swimmer_flight.pck",
+      "bytes": 3209436,
+      "sha256": "02e2a170bac0b4be81ce6f89ad2205b7b9352db22fbe7bbbfa444f2a91d648ee"
+    },
+    {
+      "path": "subpackages/wader.pck",
+      "bytes": 2045276,
+      "sha256": "a7618087bfa7923e7d9fced0b5bb00de3d36fcd1cf9834c886d6b1290ddf10e9"
+    },
+    {
+      "path": "subpackages/wader_2.pck",
+      "bytes": 460772,
+      "sha256": "da3f529d036d87653924b7f6c44a2ce921c37cd64fcc065797598a75da901b92"
+    },
+    {
+      "path": "subpackages/wader_flight.pck",
+      "bytes": 3344428,
+      "sha256": "2fb77ecd5f3e9798885aa1ba9faa05eca522bd8010399c30a4029b5cdcf80f87"
+    },
+    {
+      "path": "subpackages/wader_flight_2.pck",
+      "bytes": 1781148,
+      "sha256": "0ff9a07c0fbb53293848561300eb8a4a07bfad390591a0f9681d0fd694ea8475"
+    },
+    {
+      "path": "subpackages/water.pck",
+      "bytes": 246800,
+      "sha256": "adc8262a8c0647d7e03916458f066a6c1d397d8ab786f8592047ff1d1a7adf3f"
+    }
+  ]
+}
