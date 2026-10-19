@@ -52,13 +52,16 @@ jobs:
           curl -s -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
             "https://api.cloudflare.com/client/v4/zones?name=wetlandbirdwatching.com" 2>&1 | tee /tmp/cf_zone.log || true
 
-      - name: Domain dns create (skip if present)
+      - name: Domain dns create (check dns_records properly)
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           ZONE=$(python3 -c "import json;d=json.load(open('/tmp/cf_zone.log'));r=d.get('result') or [];print(r[0]['id'] if r else '')")
           if [ -z "$ZONE" ]; then echo "no zone id — token likely lacks Zone:Read"; exit 0; fi
-          EXISTS=$(python3 -c "import json;d=json.load(open('/tmp/cf_zone.log'));print(len(d.get('result') or []))" 2>/dev/null || echo 0)
+          curl -s -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/zones/$ZONE/dns_records?type=CNAME&name=wetlandbirdwatching.com" > /tmp/cf_dns_list.log
+          EXISTS=$(python3 -c "import json;d=json.load(open('/tmp/cf_dns_list.log'));print(len(d.get('result') or []))" 2>/dev/null || echo 0)
+          if [ "$EXISTS" != "0" ]; then echo "apex CNAME already present"; exit 0; fi
           curl -s -X POST -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json" \
             -d '{"type":"CNAME","name":"wetlandbirdwatching.com","content":"zhesi-website.pages.dev","proxied":true}' \
             "https://api.cloudflare.com/client/v4/zones/$ZONE/dns_records" 2>&1 | tee /tmp/cf_dns.log || true
