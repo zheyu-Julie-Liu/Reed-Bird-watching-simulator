@@ -16,6 +16,12 @@ jobs:
       - name: Checkout website source
         run: git clone --depth 1 https://github.com/zheyu-Julie-Liu/reed-wetland-website.git site
 
+      - name: Point game links to production domain
+        run: |
+          # source repo still carries the old GitHub Pages game URL; production = play subdomain
+          grep -rl "zheyu-Julie-Liu.github.io/Reed-Bird-watching-simulator" site --include="*.html" | xargs -r sed -i "s|zheyu-Julie-Liu.github.io/Reed-Bird-watching-simulator|play.wetlandbirdwatching.com|g"
+          sed -i "s|>GitHub Pages</a>|>Play Online</a>|" site/index.html || true
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
