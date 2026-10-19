@@ -1,0 +1,40 @@
+# zhesi deploy diagnostics 2026-10-19T13:19:34Z
+## create-project
+
+ ⛅️ wrangler 4.151.2
+────────────────────
+
+[31m✘ [41;31m[[41;97mERROR[41;31m][0m [1mA request to the Cloudflare API (/accounts/ebc829b59c08c144ed977e965c556c5a/pages/projects) failed.[0m
+
+  A project with this name already exists. Choose a different project name. [code: 8000002]
+  
+  If you think this is a bug, please open an issue at: [4mhttps://github.com/cloudflare/workers-sdk/issues/new/choose[0m
+
+
+🪵  Logs were written to "/home/runner/.config/.wrangler/logs/wrangler-2026-10-19_13-19-25_020.log"
+## deploy
+
+ ⛅️ wrangler 4.151.2
+────────────────────
+Uploading... (8/9)
+Uploading... (9/9)
+✨ Success! Uploaded 1 files (8 already uploaded) (1.02 sec)
+
+🌎 Deploying...
+✨ Deployment complete! Take a peek over at https://c4d3c338.zhesi-website.pages.dev
+## domain-register
+{
+  "result": null,
+  "success": false,
+  "errors": [
+    {
+      "code": 8000018,
+      "message": "You have already added this custom domain. Select another custom domain or check your project configuration."
+    }
+  ],
+  "messages": []
+}
+## zone-lookup
+{"result":[{"id":"76a3a7184a0d0921c3ab87f2f09156bf","name":"wetlandbirdwatching.com","status":"active","paused":false,"type":"full","development_mode":0,"name_servers":["igor.ns.cloudflare.com","leia.ns.cloudflare.com"],"original_name_servers":["dns25.hichina.com","dns26.hichina.com"],"original_registrar":"alibaba cloud computing ltd. d (id: 1599)","original_dnshost":null,"modified_on":"2026-09-03T04:34:25.863029Z","created_on":"2026-09-03T02:54:59.804633Z","activated_on":"2026-09-03T04:34:25.863029Z","vanity_name_servers":[],"vanity_name_servers_ips":null,"meta":{"step":2,"custom_certificate_quota":0,"page_rule_quota":3,"phishing_detected":false},"owner":{"id":null,"type":"user","email":null},"account":{"id":"ebc829b59c08c144ed977e965c556c5a","name":"Zheyu.liu@gmail.com's Account"},"tenant":{"id":null,"name":null},"tenant_unit":{"id":null},"permissions":["#zone_settings:edit","#zone_settings:read","#worker:edit","#worker:read","#zone:read"],"plan":{"id":"0feeeeeeeeeeeeeeeeeeeeeeeeeeeeee","name":"Free Website","price":0,"currency":"USD","frequency":"","is_subscribed":false,"can_subscribe":false,"legacy_id":"free","legacy_discount":false,"externally_managed":false}}],"result_info":{"page":1,"per_page":20,"total_pages":1,"count":1,"total_count":1},"success":true,"errors":[],"messages":[]}
+## dns-create
+{"success":false,"errors":[{"code":10000,"message":"Authentication error","documentation_url":"https://developers.cloudflare.com/api/resources/dns/subresources/records/methods/create"}],"messages":[],"result":null}
