@@ -1,10 +1,10 @@
 {
-  "release": "2026-10-20-desktop-adults",
+  "release": "2026-10-21-desktop-fonts",
   "desktop_only": true,
   "adult_species": 77,
   "subpackages": 22,
-  "runtime_raw_bytes": 83544052,
-  "gzip_estimate_bytes": 52260974,
+  "runtime_raw_bytes": 91308791,
+  "gzip_estimate_bytes": 60013710,
   "budget_bytes": 100000000,
   "files": [
     {
@@ -29,8 +29,8 @@
     },
     {
       "path": "demo.html",
-      "bytes": 29360,
-      "sha256": "a27aa9ca2ae5efa738943f844ab6f716e5f04e549e37a127b38df98442a79cb5"
+      "bytes": 29363,
+      "sha256": "4c81fbe41c5e4fc5649120ce04171c0dba9bfd475761ae9d41b09b84ae649a96"
     },
     {
       "path": "demo.icon.png",
@@ -44,8 +44,8 @@
     },
     {
       "path": "demo.pck",
-      "bytes": 4341848,
-      "sha256": "e8c2808dbdfbb87bb386d243debb85fb66004aef11f71f8a4d5aacc566ac90ae"
+      "bytes": 12106584,
+      "sha256": "57bc4d2df94a419b0f0323abefe3c032df96dad011520a59cf7ba7af562d4248"
     },
     {
       "path": "demo.png",

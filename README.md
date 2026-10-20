@@ -7,18 +7,19 @@
 当前版本仅支持电脑浏览器；手机端尚未通过内存优化与真机验证，不会自动加载桌面游戏资源。
 
 - 当前只发布 77 种成鸟；不包含尚未启用的幼鸟、亚成鸟、芦苇杆备用立绘和独立鸟叫。
-- 全部运行文件合计约 83.55 MB（含引擎、主包、22 个分包、音乐及封面，未计 HTTP 压缩节省）。
+- 全部运行文件合计约 91.31 MB（含引擎、主包、22 个分包、音乐及封面，未计 HTTP 压缩节省）。
+- 中文使用完整 Noto Sans SC 字体，内置 UI 符号字体，不依赖本机系统字体补字。
 - 发布检查按全部运行文件执行 100 MB 预算；资源与校验值见 game_manifest.json。
 
 ## 在线试玩
 
-- 主站（Cloudflare）：https://play.wetlandbirdwatching.com/demo.html
+- 主站（Cloudflare）：https://play.wetlandbirdwatching.com/
 - itch.io：https://zheyu-julie.itch.io/reed-bird-watching-simulator
 - GitHub Pages：https://zheyu-julie-liu.github.io/Reed-Bird-watching-simulator/demo.html
 
 ## 特色
 
-- 77 种湿地鸟类图鉴（含成鸟/亚成鸟/雏鸟状态），全部带科普故事
+- 77 种湿地鸟类图鉴（网页版仅成鸟），全部带科普故事
 - 鸟类行为系统：群聚 / 飞逃 / 游走 / 捕食 / 反击
 - 微生境刷新：芦苇荡垂直分层（高空巡飞层 / 苇秆层 / 苇丛层 / 水面层），各住各的鸟
 - 昼夜与季节系统：不同时段出现的鸟不同
@@ -27,7 +28,7 @@
 
 ## 操作
 
-鼠标点击 / 触屏点按即可：点鸟看介绍、点头像和巡护员老周聊天、点入口进芦苇荡深层场景。
+鼠标点击即可：点鸟看介绍、点头像和巡护员老周聊天、点入口进芦苇荡深层场景。
 
 ## 引擎
 
@@ -36,3 +37,5 @@ Godot 4 · GDScript
 ## 许可
 
 [MIT](LICENSE) © Julie Liu
+
+内含 Noto Sans SC 与 Noto Sans Symbols 2，按 SIL Open Font License 发行；对应许可证随游戏包提供。
