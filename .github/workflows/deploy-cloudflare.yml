@@ -38,8 +38,16 @@ jobs:
           for (const f of files) if (f && !allowed.has(f)) throw Error('Undeclared runtime file: ' + f);
           console.log('Verified runtime bytes:', total);
           JS
-      - name: Install wrangler
-        run: npm install -g wrangler@latest
+      - name: Install wrangler with network retries
+        run: |
+          for attempt in 1 2 3; do
+            if npm install -g wrangler@latest --fetch-retries=5 --fetch-retry-mintimeout=2000 --fetch-retry-maxtimeout=10000; then
+              exit 0
+            fi
+            echo "Wrangler download failed; retry $attempt/3"
+            sleep 5
+          done
+          exit 1
       - name: Upload verified desktop release and remove unused resources
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -48,11 +56,22 @@ jobs:
           set -euo pipefail
           BASE="${{ github.event.before }}"
           if ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then BASE=HEAD~1; fi
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            FILES=$(node -e 'const m=require("./game_manifest.json"); console.log(m.files.map(f=>f.path).concat(["index.html","game_manifest.json"]).join("\n"))')
-          else
-            FILES=$(git diff --name-only --diff-filter=ACMRT "$BASE" HEAD -- 'demo.*' 'game_*' 'index.html' 'audio_embed.js' 'subpackages/*' 'audio/*')
-          fi
+          # Compare with the last completed live release, not the previous Git commit:
+          # a failed deployment must not make the next run skip its missing files.
+          REMOTE_MANIFEST=$(mktemp)
+          curl --fail --silent --show-error --retry 3 --connect-timeout 10 --max-time 30 \
+            "https://play.wetlandbirdwatching.com/game_manifest.json?deployment=${GITHUB_SHA}" \
+            -o "$REMOTE_MANIFEST" || printf '{}' > "$REMOTE_MANIFEST"
+          FILES=$(node - "$REMOTE_MANIFEST" <<'JS'
+          const fs = require('node:fs');
+          const local = JSON.parse(fs.readFileSync('game_manifest.json'));
+          let remote = {};
+          try { remote = JSON.parse(fs.readFileSync(process.argv[2])); } catch (_) {}
+          const previous = new Map((Array.isArray(remote.files) ? remote.files : []).map(f => [f.path, f.sha256]));
+          const changed = local.files.filter(f => previous.get(f.path) !== f.sha256).map(f => f.path);
+          console.log([...new Set([...changed, 'demo.html', 'index.html', 'game_manifest.json'])].join('\n'));
+          JS
+          )
           ASSETS=$(printf '%s\n' "$FILES" | grep -Ev '^(demo\.(html|pck)|index\.html|game_manifest\.json)$' || true)
           if [ -n "$ASSETS" ]; then
             printf '%s\n' "$ASSETS" | xargs -r -d '\n' -P 4 -n 1 bash -c '
@@ -74,3 +93,26 @@ jobs:
             ' _
           fi
           wrangler r2 object put reed-bird-game/game_manifest.json --file game_manifest.json --remote
+      - name: Verify live entry and completion manifest
+        run: |
+          set -euo pipefail
+          for entry in demo.html game_manifest.json; do
+            curl --fail --silent --show-error --retry 3 --retry-all-errors \
+              --connect-timeout 10 --max-time 45 -H 'Cache-Control: no-cache' \
+              "https://play.wetlandbirdwatching.com/$entry?deployment=${GITHUB_SHA}" \
+              -o "/tmp/live-$entry"
+          done
+          # Also check the exact canonical URL users open, without a version parameter.
+          curl --fail --silent --show-error --retry 3 --retry-all-errors \
+            --connect-timeout 10 --max-time 45 -H 'Cache-Control: no-cache' \
+            'https://play.wetlandbirdwatching.com/demo.html' -o /tmp/live-canonical.html
+          node <<'JS'
+          const fs = require('node:fs');
+          const crypto = require('node:crypto');
+          const hash = p => crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+          for (const entry of ['demo.html', 'game_manifest.json']) {
+            if (hash(entry) !== hash('/tmp/live-' + entry)) throw Error('Live release mismatch: ' + entry);
+          }
+          if (hash('demo.html') !== hash('/tmp/live-canonical.html')) throw Error('Canonical URL is stale');
+          console.log('Latest release verified at https://play.wetlandbirdwatching.com/demo.html');
+          JS

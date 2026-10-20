@@ -115,7 +115,7 @@ html, body {
 .cover {
 	position: absolute;
 	inset: 0;
-	background: url("game_cover.webp") center center / cover no-repeat;
+	background: url("game_cover.webp?v=c34f8dc3b7bcd798") center center / cover no-repeat;
 	transform: scale(1.04);
 	animation: slowZoom 28s ease-in-out infinite alternate;
 	z-index: 0;
@@ -333,7 +333,7 @@ html, body {
 
 		<!-- Godot loading status -->
 		<div id="status">
-			<img id="status-splash" class="show-image--true fullsize--true use-filter--true" src="demo.png" alt="">
+			<img id="status-splash" class="show-image--true fullsize--true use-filter--true" src="demo.png?v=3cb4495c0b98dfbe" alt="">
 			<progress id="status-progress"></progress>
 			<div id="status-notice"></div>
 		</div>
@@ -346,7 +346,7 @@ html, body {
 
 				<header class="topbar" id="topbar">
 					<div class="brand">
-						<img src="game_logo.webp" alt="logo" />
+						<img src="game_logo.webp?v=59f993d08ce3313d" alt="logo" />
 						<span class="name" id="brandName">菁灵社·哲思创意</span>
 					</div>
 					<div class="version">v1.0.0 · BUILD 2026.08</div>
@@ -473,8 +473,8 @@ window.addEventListener('load', scaleCover);
 scaleCover();
 		</script>
 
-		<script src="demo.js"></script>
-		<script src="audio_embed.js"></script>
+		<script src="demo.js?v=68586d6daafc93c6"></script>
+		<script src="audio_embed.js?v=94cfec186142e867"></script>
 		<script>
 const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":4341848,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
@@ -507,7 +507,7 @@ const URL_PARAMS = new URLSearchParams(location.search);
 // 直接请求原始 Wasm/PCK，由 HTTP Content-Encoding 处理传输压缩。
 // 不探测不存在的 .gz 文件，不使用曾导致黑屏的 Cache API。
 // 发布工具按文件内容填入版本号，避免新主包与浏览器缓存的旧分包混用。
-const RESOURCE_VERSIONS = {"demo.pck":"e8c2808dbdfbb87b","demo.wasm":"7eda98958eb09135","subpackages/backgrounds.pck":"827c918c5e6dddf2","subpackages/marsh.pck":"fd6c4492b77bf45a","subpackages/marsh_2.pck":"a68e1296e8cfe561","subpackages/metasequoia.pck":"24a0e466047130be","subpackages/other.pck":"5db64b7cdb07b5f9","subpackages/other_flight.pck":"a5a87293497fd774","subpackages/reeds.pck":"ff669b80dda6dc38","subpackages/reeds_2.pck":"a3dd55832d1e8783","subpackages/reeds_3.pck":"6a9707e7e28bf83e","subpackages/reeds_4.pck":"6d8567736eebe106","subpackages/songbird.pck":"6b17f0a896913c8f","subpackages/songbird_extra_flight.pck":"d5bd356371cdd01e","subpackages/songbird_flight.pck":"c4dd4e18363506cc","subpackages/swimmer.pck":"39d360fa6ff1a935","subpackages/swimmer_2.pck":"b3fbb4b5bf3355b5","subpackages/swimmer_3.pck":"ffde5675b1f58243","subpackages/swimmer_flight.pck":"02e2a170bac0b4be","subpackages/wader.pck":"a7618087bfa7923e","subpackages/wader_2.pck":"da3f529d036d8765","subpackages/wader_flight.pck":"2fb77ecd5f3e9798","subpackages/wader_flight_2.pck":"0ff9a07c0fbb5329","subpackages/water.pck":"adc8262a8c0647d7"};
+const RESOURCE_VERSIONS = {"audio_embed.js":"94cfec186142e867","demo.apple-touch-icon.png":"3b26f608cccdebe8","demo.audio.position.worklet.js":"be33985bc7160d6b","demo.audio.worklet.js":"5b476a9c9ce642c0","demo.icon.png":"0f7988acc72fcb26","demo.js":"68586d6daafc93c6","demo.pck":"e8c2808dbdfbb87b","demo.png":"3cb4495c0b98dfbe","demo.wasm":"7eda98958eb09135","game_cover.webp":"c34f8dc3b7bcd798","game_logo.webp":"59f993d08ce3313d","subpackages/backgrounds.pck":"827c918c5e6dddf2","subpackages/marsh.pck":"fd6c4492b77bf45a","subpackages/marsh_2.pck":"a68e1296e8cfe561","subpackages/metasequoia.pck":"24a0e466047130be","subpackages/other.pck":"5db64b7cdb07b5f9","subpackages/other_flight.pck":"a5a87293497fd774","subpackages/reeds.pck":"ff669b80dda6dc38","subpackages/reeds_2.pck":"a3dd55832d1e8783","subpackages/reeds_3.pck":"6a9707e7e28bf83e","subpackages/reeds_4.pck":"6d8567736eebe106","subpackages/songbird.pck":"6b17f0a896913c8f","subpackages/songbird_extra_flight.pck":"d5bd356371cdd01e","subpackages/songbird_flight.pck":"c4dd4e18363506cc","subpackages/swimmer.pck":"39d360fa6ff1a935","subpackages/swimmer_2.pck":"b3fbb4b5bf3355b5","subpackages/swimmer_3.pck":"ffde5675b1f58243","subpackages/swimmer_flight.pck":"02e2a170bac0b4be","subpackages/wader.pck":"a7618087bfa7923e","subpackages/wader_2.pck":"da3f529d036d8765","subpackages/wader_flight.pck":"2fb77ecd5f3e9798","subpackages/wader_flight_2.pck":"0ff9a07c0fbb5329","subpackages/water.pck":"adc8262a8c0647d7"};
 const RESOURCE_SIZES = {"demo.pck":4341848,"subpackages/backgrounds.pck":884592,"subpackages/marsh.pck":808980,"subpackages/marsh_2.pck":1635296,"subpackages/metasequoia.pck":840616,"subpackages/other.pck":1243672,"subpackages/other_flight.pck":2892892,"subpackages/reeds.pck":1035472,"subpackages/reeds_2.pck":2253700,"subpackages/reeds_3.pck":1666408,"subpackages/reeds_4.pck":1679172,"subpackages/songbird.pck":1561896,"subpackages/songbird_extra_flight.pck":3454012,"subpackages/songbird_flight.pck":2467128,"subpackages/swimmer.pck":1622204,"subpackages/swimmer_2.pck":399000,"subpackages/swimmer_3.pck":712112,"subpackages/swimmer_flight.pck":3209436,"subpackages/wader.pck":2045276,"subpackages/wader_2.pck":460772,"subpackages/wader_flight.pck":3344428,"subpackages/wader_flight_2.pck":1781148,"subpackages/water.pck":246800};
 (function () {
 	const transport = window.fetch.bind(window);
