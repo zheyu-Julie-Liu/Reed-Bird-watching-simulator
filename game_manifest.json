@@ -3,8 +3,8 @@
   "desktop_only": true,
   "adult_species": 77,
   "subpackages": 22,
-  "runtime_raw_bytes": 83542194,
-  "gzip_estimate_bytes": 52260494,
+  "runtime_raw_bytes": 83543612,
+  "gzip_estimate_bytes": 52260754,
   "budget_bytes": 100000000,
   "files": [
     {
@@ -29,8 +29,8 @@
     },
     {
       "path": "demo.html",
-      "bytes": 27502,
-      "sha256": "e95e77fc8220e76f768d707f89456b4e9641306beb46ba6f10f31fe64d8e9d79"
+      "bytes": 28920,
+      "sha256": "486cbefc0fd10a1476c3af87d543a6b53ec379c2357874bcbe5712562ca43d81"
     },
     {
       "path": "demo.icon.png",
