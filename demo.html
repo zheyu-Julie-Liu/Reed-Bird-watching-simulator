@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 	<head>
 		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 		<title>芦苇荡巡护模拟器</title>
 		<style>
 :root {
@@ -115,7 +115,7 @@ html, body {
 .cover {
 	position: absolute;
 	inset: 0;
-	background: url("game_cover.webp?v=c34f8dc3b7bcd798") center center / cover no-repeat;
+	background: url("game_cover.webp") center center / cover no-repeat;
 	transform: scale(1.04);
 	animation: slowZoom 28s ease-in-out infinite alternate;
 	z-index: 0;
@@ -333,7 +333,7 @@ html, body {
 
 		<!-- Godot loading status -->
 		<div id="status">
-			<img id="status-splash" class="show-image--true fullsize--true use-filter--true" src="demo.png?v=3cb4495c0b98dfbe" alt="">
+			<img id="status-splash" class="show-image--true fullsize--true use-filter--true" src="demo.png" alt="">
 			<progress id="status-progress"></progress>
 			<div id="status-notice"></div>
 		</div>
@@ -346,7 +346,7 @@ html, body {
 
 				<header class="topbar" id="topbar">
 					<div class="brand">
-						<img src="game_logo.webp?v=59f993d08ce3313d" alt="logo" />
+						<img src="game_logo.webp" alt="logo" />
 						<span class="name" id="brandName">菁灵社·哲思创意</span>
 					</div>
 					<div class="version">v1.0.0 · BUILD 2026.08</div>
@@ -374,7 +374,7 @@ html, body {
 							<span class="btn-loading" id="startLoading">加载中…</span>
 						</button>
 						<div id="loadHint" style="margin-top:18px;min-height:34px;font-size:clamp(18px,3.2vmin,34px);font-weight:600;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.75);letter-spacing:.02em;">&nbsp;</div>
-						<div id="rotateHint" style="margin-top:8px;font-size:clamp(14px,2.4vmin,24px);color:rgba(255,255,255,.85);text-shadow:0 1px 4px rgba(0,0,0,.7);letter-spacing:.03em;">当前支持电脑浏览器 · Desktop browsers only</div>
+						<div id="rotateHint" style="margin-top:8px;font-size:clamp(14px,2.4vmin,24px);color:rgba(255,255,255,.85);text-shadow:0 1px 4px rgba(0,0,0,.7);letter-spacing:.03em;">建议横屏体验 · Landscape recommended</div>
 					</div>
 				</main>
 
@@ -387,6 +387,30 @@ html, body {
 		<noscript>您的浏览器不支持 JavaScript。</noscript>
 
 		<!-- ===== 封面缩放脚本：独立于 Godot 引擎块，导出前预览也能正常缩放 ===== -->
+<script>
+// T-0126：iOS Safari 无视 user-scalable=no，捏合缩放页面后 Godot 画布触点映射漂移
+// （表现为：鸟点不到、双击空白还原失效）。中和层：visualViewport.scale≠1 时对画布
+// 反向 CSS transform，使游戏始终 1:1 呈现；触点经 boundingRect 换算后仍精确。
+(function(){
+  var vv = window.visualViewport;
+  if (!vv || !vv.addEventListener) return;
+  var cv = null;
+  function onVV(){
+    if (!cv) cv = document.getElementById('canvas');
+    if (!cv) return;
+    var s = vv.scale || 1;
+    if (Math.abs(s - 1) > 0.01) {
+      cv.style.transformOrigin = '0 0';
+      cv.style.transform = 'scale(' + (1/s) + ')';
+    } else if (cv.style.transform) {
+      cv.style.transform = '';
+    }
+  }
+  vv.addEventListener('resize', onVV);
+  vv.addEventListener('scroll', onVV);
+  onVV();
+})();
+</script>
 		<script>
 // ===== 外壳语言切换：选择写入 localStorage，游戏内 Lang 读取同一键 =====
 const SHELL_LANG_KEY = 'reed_lang';
@@ -399,7 +423,7 @@ const SHELL_STRINGS = {
 		start: 'Start Patrol',
 		loading: 'Loading…',
 		footer: '© 2026 Sophi Interactive · Wetland Science Patrol Experience',
-		rotate: 'Desktop browsers only; mobile support is not available yet',
+		rotate: 'Landscape recommended for the best experience',
 		statusConnecting: 'Connecting to engine and preparing resources…',
 		statusEngine: 'Downloading engine demo.wasm (~39MB). First visit may take a while…',
 		statusEngineSlow: 'Still connecting… If this takes too long, check your network. Downloaded files are cached — refresh to resume.',
@@ -417,7 +441,7 @@ const SHELL_STRINGS = {
 		start: '开始巡护',
 		loading: '加载中…',
 		footer: '© 2026 哲思创意 · 湿地科学巡护体验',
-		rotate: '当前仅支持电脑浏览器，暂不支持手机',
+		rotate: '建议横屏体验，效果更佳',
 		statusConnecting: '正在连接引擎并准备资源…',
 		statusEngine: '正在下载引擎 demo.wasm（约 39MB），首次打开请耐心等待…',
 		statusEngineSlow: '仍在连接引擎……若长时间无进展请检查网络；已下载内容会缓存，刷新可继续。',
@@ -473,10 +497,10 @@ window.addEventListener('load', scaleCover);
 scaleCover();
 		</script>
 
-		<script src="demo.js?v=68586d6daafc93c6"></script>
-		<script src="audio_embed.js?v=94cfec186142e867"></script>
+		<script src="demo.js"></script>
+		<script src="audio_embed.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":12106584,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"demo","experimentalVK":false,"fileSizes":{"demo.pck":19970588,"demo.wasm":39509339},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
@@ -507,8 +531,8 @@ const URL_PARAMS = new URLSearchParams(location.search);
 // 直接请求原始 Wasm/PCK，由 HTTP Content-Encoding 处理传输压缩。
 // 不探测不存在的 .gz 文件，不使用曾导致黑屏的 Cache API。
 // 发布工具按文件内容填入版本号，避免新主包与浏览器缓存的旧分包混用。
-const RESOURCE_VERSIONS = {"audio_embed.js":"94cfec186142e867","demo.apple-touch-icon.png":"3b26f608cccdebe8","demo.audio.position.worklet.js":"be33985bc7160d6b","demo.audio.worklet.js":"5b476a9c9ce642c0","demo.icon.png":"0f7988acc72fcb26","demo.js":"68586d6daafc93c6","demo.pck":"57bc4d2df94a419b","demo.png":"3cb4495c0b98dfbe","demo.wasm":"7eda98958eb09135","game_cover.webp":"c34f8dc3b7bcd798","game_logo.webp":"59f993d08ce3313d","subpackages/backgrounds.pck":"827c918c5e6dddf2","subpackages/marsh.pck":"fd6c4492b77bf45a","subpackages/marsh_2.pck":"a68e1296e8cfe561","subpackages/metasequoia.pck":"24a0e466047130be","subpackages/other.pck":"5db64b7cdb07b5f9","subpackages/other_flight.pck":"a5a87293497fd774","subpackages/reeds.pck":"ff669b80dda6dc38","subpackages/reeds_2.pck":"a3dd55832d1e8783","subpackages/reeds_3.pck":"6a9707e7e28bf83e","subpackages/reeds_4.pck":"6d8567736eebe106","subpackages/songbird.pck":"6b17f0a896913c8f","subpackages/songbird_extra_flight.pck":"d5bd356371cdd01e","subpackages/songbird_flight.pck":"c4dd4e18363506cc","subpackages/swimmer.pck":"39d360fa6ff1a935","subpackages/swimmer_2.pck":"b3fbb4b5bf3355b5","subpackages/swimmer_3.pck":"ffde5675b1f58243","subpackages/swimmer_flight.pck":"02e2a170bac0b4be","subpackages/wader.pck":"a7618087bfa7923e","subpackages/wader_2.pck":"da3f529d036d8765","subpackages/wader_flight.pck":"2fb77ecd5f3e9798","subpackages/wader_flight_2.pck":"0ff9a07c0fbb5329","subpackages/water.pck":"adc8262a8c0647d7"};
-const RESOURCE_SIZES = {"demo.pck":12106584,"subpackages/backgrounds.pck":884592,"subpackages/marsh.pck":808980,"subpackages/marsh_2.pck":1635296,"subpackages/metasequoia.pck":840616,"subpackages/other.pck":1243672,"subpackages/other_flight.pck":2892892,"subpackages/reeds.pck":1035472,"subpackages/reeds_2.pck":2253700,"subpackages/reeds_3.pck":1666408,"subpackages/reeds_4.pck":1679172,"subpackages/songbird.pck":1561896,"subpackages/songbird_extra_flight.pck":3454012,"subpackages/songbird_flight.pck":2467128,"subpackages/swimmer.pck":1622204,"subpackages/swimmer_2.pck":399000,"subpackages/swimmer_3.pck":712112,"subpackages/swimmer_flight.pck":3209436,"subpackages/wader.pck":2045276,"subpackages/wader_2.pck":460772,"subpackages/wader_flight.pck":3344428,"subpackages/wader_flight_2.pck":1781148,"subpackages/water.pck":246800};
+const RESOURCE_VERSIONS = {};
+const RESOURCE_SIZES = {};
 (function () {
 	const transport = window.fetch.bind(window);
 	window.fetch = function (input, init) {
@@ -593,13 +617,8 @@ var gameStarted = false;
 		initializing = false;
 	}
 
-	if (IS_MOBILE_DEVICE) {
-		document.getElementById('startBtn').disabled = true;
-		displayFailureNotice(shellLang === 'en'
-			? 'This version supports desktop browsers. Mobile support will follow after memory optimization and device testing.'
-			: '当前版本仅支持电脑浏览器。手机版将在完成内存优化与真机验证后开放。');
-		return;
-	}
+	// T-0126（boss 11-13）：拆除移动端禁用门槛——包体已压到 ~100MB 预算内，
+	// 手机浏览器允许尝试加载（AUTO_MOBILE 分档已自动给移动端更轻的预载清单）。
 	const missing = Engine.getMissingFeatures({ threads: GODOT_THREADS_ENABLED });
 	if (missing.length !== 0) {
 		if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] && 'serviceWorker' in navigator) {
