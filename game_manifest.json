@@ -1,0 +1,200 @@
+{
+  "release": "2026-11-13-full-245",
+  "desktop_only": false,
+  "adult_species": 245,
+  "subpackages": 26,
+  "runtime_raw_bytes": 251953341,
+  "budget_bytes": 350000000,
+  "files": [
+    {
+      "path": "demo.html",
+      "bytes": 27713,
+      "sha256": "b547c6cdd254becf94cda44e5c4f3cc331038137dbaf45866b1feab5d45c81e2"
+    },
+    {
+      "path": "demo.js",
+      "bytes": 279815,
+      "sha256": "68586d6daafc93c6e697b3fb258976874aa7459b8931165ebb1dc3c9614cc42c"
+    },
+    {
+      "path": "demo.wasm",
+      "bytes": 39509339,
+      "sha256": "7eda98958eb09135a1acb54a4323a00b1a55af1997f15fa1cdc2b93e3df46656"
+    },
+    {
+      "path": "demo.pck",
+      "bytes": 19970588,
+      "sha256": "f7aa29bd2c6ea360805335ebe9684a0535e9b3eb5cf9cc45f6e6614ce42b52a2"
+    },
+    {
+      "path": "demo.png",
+      "bytes": 21443,
+      "sha256": "3cb4495c0b98dfbe4b663cbf2b6836473572339beb66d902367893162a70be0e"
+    },
+    {
+      "path": "demo.icon.png",
+      "bytes": 5769,
+      "sha256": "0f7988acc72fcb26c666c5cf10f3aebbfc0ac73ad2322c73ea832ea5f7f3cf8f"
+    },
+    {
+      "path": "demo.apple-touch-icon.png",
+      "bytes": 11929,
+      "sha256": "3b26f608cccdebe8006a7309a1da219cafa5e29304055bed7b8eb8a3b6825938"
+    },
+    {
+      "path": "demo.audio.worklet.js",
+      "bytes": 7298,
+      "sha256": "5b476a9c9ce642c0ee4256436d1bc31d9c38f868aca0f9a8e2a57c18d2dec2a3"
+    },
+    {
+      "path": "demo.audio.position.worklet.js",
+      "bytes": 2973,
+      "sha256": "be33985bc7160d6bf9646f259cd86b259cd67b02ccb297ee5c44f8ac84327bc8"
+    },
+    {
+      "path": "audio_embed.js",
+      "bytes": 1668866,
+      "sha256": "94cfec186142e86797410fada6cabf298a8db3bb6bcc2472cc867aced09455b2"
+    },
+    {
+      "path": "game_cover.webp",
+      "bytes": 1016340,
+      "sha256": "c34f8dc3b7bcd798507717c531ebe4953395be69df9ea1e8b7b98d8afc11e31f"
+    },
+    {
+      "path": "game_logo.webp",
+      "bytes": 404060,
+      "sha256": "59f993d08ce3313dcacc06f6f89704bf1cfc0ce06c72f3144e9f5d5e2997f7c5"
+    },
+    {
+      "path": "subpackages/backgrounds.pck",
+      "bytes": 7643728,
+      "sha256": "836b3ce4d06c33848c11b4672c8d34cba3caa00bb470ca465059a5291745ed32"
+    },
+    {
+      "path": "subpackages/marsh.pck",
+      "bytes": 5260692,
+      "sha256": "b20fb1afce8926e66b86e2bf4b591545e38b5ae1a858d2a42cfa9d96957c5052"
+    },
+    {
+      "path": "subpackages/marsh_2.pck",
+      "bytes": 8311776,
+      "sha256": "8309ca55f02ceb44b17ce29b09d91d0ffd16ac8b163fcd5c9473c948a0502fd7"
+    },
+    {
+      "path": "subpackages/metasequoia.pck",
+      "bytes": 5325832,
+      "sha256": "8b1a2c8c5ca476eee74b240416f29368ddfc6e99474abbd84c803f0f7a67787a"
+    },
+    {
+      "path": "subpackages/other.pck",
+      "bytes": 5535128,
+      "sha256": "487042198e60f0165275507e6ccaa8a46d9fe57bdada8d6c6d1295a611e9e462"
+    },
+    {
+      "path": "subpackages/other_flight.pck",
+      "bytes": 12424796,
+      "sha256": "736220d79848e1649412d65b35f375149679a11b6482c5745f9547cc0d2811cf"
+    },
+    {
+      "path": "subpackages/reed_stand.pck",
+      "bytes": 132,
+      "sha256": "d0076fe0519146f77835e49d5bb557e57334ccecaca94d0a193211e2b2054786"
+    },
+    {
+      "path": "subpackages/reed_stand_2.pck",
+      "bytes": 4322756,
+      "sha256": "3f741c1ca7e7dd7fb4204b8f082fee5708eea5462e05faac14d3b6c74ce77629"
+    },
+    {
+      "path": "subpackages/reed_stand_3.pck",
+      "bytes": 4590816,
+      "sha256": "10862c55bbbe6a9a39322e30496211a9cafe34fdc5350754dbf2a6351948b946"
+    },
+    {
+      "path": "subpackages/reed_stand_4.pck",
+      "bytes": 1577004,
+      "sha256": "a1325545c87ca45c2f73911b836c9959b773aec60639a6af0f9a2c98c381560b"
+    },
+    {
+      "path": "subpackages/reeds.pck",
+      "bytes": 6224912,
+      "sha256": "ba52c118886593a913988440bb2277d211d002a6a403ab8932e3d246863f7d5a"
+    },
+    {
+      "path": "subpackages/reeds_2.pck",
+      "bytes": 10722372,
+      "sha256": "0eb8f0c0955687e6cbd4fd550bced64e9d588869bda2c0d8f4b83ac6a0f8334a"
+    },
+    {
+      "path": "subpackages/reeds_3.pck",
+      "bytes": 8405480,
+      "sha256": "b359cc812ff1cad14d279631719c1aad9a9ab20f46c12890940fa5b1f943a2ae"
+    },
+    {
+      "path": "subpackages/reeds_4.pck",
+      "bytes": 8595204,
+      "sha256": "3de29407a014ea025a921bff72cfab15a44b8039ba92ccd8cf49dfc3e16f93da"
+    },
+    {
+      "path": "subpackages/songbird.pck",
+      "bytes": 7137288,
+      "sha256": "23b54409c66a35490bf6e6785ae2a3c2770b2039aff5f364fc09d90380c566cb"
+    },
+    {
+      "path": "subpackages/songbird_extra_flight.pck",
+      "bytes": 15746012,
+      "sha256": "7d0a08d3b0d08d7d55b14257ad170c4b42682075ed6f68e9b8a06eebd38eb917"
+    },
+    {
+      "path": "subpackages/songbird_flight.pck",
+      "bytes": 11313464,
+      "sha256": "0f5a4ab7b15ed53f853c263358c316a193b2184c22967244cec85d9c3441b3cd"
+    },
+    {
+      "path": "subpackages/swimmer.pck",
+      "bytes": 7881372,
+      "sha256": "be5118bed9f7d80787f6b3dc8a0efb3b93a7cc54d6422b1f8e20be379eb3aef7"
+    },
+    {
+      "path": "subpackages/swimmer_2.pck",
+      "bytes": 2728344,
+      "sha256": "866a8d63d8e0486887567234fb5d812c82ee6e93918e13ff0e24d42bc978545b"
+    },
+    {
+      "path": "subpackages/swimmer_3.pck",
+      "bytes": 4148816,
+      "sha256": "21379e3f2d1248ed534926592f74d3709ee0fb58146fefccaa22f715d1369716"
+    },
+    {
+      "path": "subpackages/swimmer_flight.pck",
+      "bytes": 14776764,
+      "sha256": "d0d5048cef2f1ce7853b08a4f3db851e1097b5ebf0bd0d98678a0037bade6c55"
+    },
+    {
+      "path": "subpackages/wader.pck",
+      "bytes": 10039676,
+      "sha256": "addcda556cfa0c69bf518e5a7f25b41964d40343fdca47773955fe0195611e12"
+    },
+    {
+      "path": "subpackages/wader_2.pck",
+      "bytes": 2021508,
+      "sha256": "57ec070cdaf7686f66139373da241ffbf908c9ac2f54cb8c6166757e905be028"
+    },
+    {
+      "path": "subpackages/wader_flight.pck",
+      "bytes": 14554828,
+      "sha256": "15ce481eac595d4a960e08296d74398337d3eeb4c75352864d57f41085abb5f3"
+    },
+    {
+      "path": "subpackages/wader_flight_2.pck",
+      "bytes": 7625404,
+      "sha256": "0c9624e5c65eaa7a1505383f17ea5932e78342eb064dc870ec4558b83dbb6abd"
+    },
+    {
+      "path": "subpackages/water.pck",
+      "bytes": 2113104,
+      "sha256": "c94eaaecd5ff39e7942685aeecd6e98baba658ab83f2e005d08e494436145850"
+    }
+  ]
+}
