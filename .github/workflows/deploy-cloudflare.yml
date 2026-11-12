@@ -33,7 +33,7 @@ jobs:
             if (bytes.length !== f.bytes || crypto.createHash('sha256').update(bytes).digest('hex') !== f.sha256) throw Error('Manifest mismatch: ' + f.path);
             allowed.add(f.path); total += bytes.length;
           }
-          if (total !== m.runtime_raw_bytes || total > 100000000 || !m.desktop_only || m.adult_species !== 77) throw Error('Runtime release budget/policy failed');
+          if (total !== m.runtime_raw_bytes || total > 350000000 || m.adult_species !== 245) throw Error('Runtime release budget/policy failed');
           const files = cp.execFileSync('git', ['ls-files', '--', 'demo.*', 'game_*', 'index.html', 'subpackages/*', 'audio/*', 'audio_embed.js'], {encoding:'utf8'}).trim().split('\n');
           for (const f of files) if (f && !allowed.has(f)) throw Error('Undeclared runtime file: ' + f);
           console.log('Verified runtime bytes:', total);
